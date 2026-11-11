@@ -1,0 +1,71 @@
+# Moves prod-main to main once verify has passed on it. Cloudflare Workers Builds deploys the site
+# and its backend from prod-main, so only a commit that passed the checks ever goes live.
+#
+# main is where every change lands; prod-main only follows it, and nothing is ever merged back.
+# The fast-forward check is deliberate: if prod-main ever has a commit main doesn't, this job
+# FAILS rather than force-pushing, because prod-main is live and a force-push would unpublish
+# whatever is only there.
+name: promote-prod-main
+
+on:
+  workflow_run:
+    workflows: [verify]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# One promotion at a time, never cancelled half-way.
+concurrency:
+  group: promote-prod-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    # Only a green verify run for a push to main (not pull requests, not failures).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fast-forward prod-main to the verified commit
+        env:
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          # The first promotion creates prod-main.
+          if ! git fetch origin prod-main 2>/dev/null; then
+            target="${VERIFIED_SHA:-$(git rev-parse origin/main)}"
+            git push origin "$target":refs/heads/prod-main
+            exit 0
+          fi
+
+          # The commit verify passed on, or the current main when run by hand.
+          target="${VERIFIED_SHA:-$(git rev-parse origin/main)}"
+
+          if ! git merge-base --is-ancestor "$target" origin/main; then
+            echo "::error::$target is not on main. Refusing to deploy it."
+            exit 1
+          fi
+          if git merge-base --is-ancestor "$target" origin/prod-main; then
+            echo "prod-main already contains $(git rev-parse --short "$target"). Nothing to do."
+            exit 0
+          fi
+          if ! git merge-base --is-ancestor origin/prod-main "$target"; then
+            echo "::error::prod-main has commits that are not on main, so it can't fast-forward."
+            echo "Refusing to force-push: prod-main is live. Bring them into main once:"
+            echo "  git checkout main && git merge origin/prod-main && git push origin main"
+            git log --oneline "$target"..origin/prod-main
+            exit 1
+          fi
+
+          echo "Fast-forwarding prod-main to $(git rev-parse --short "$target")"
+          git push origin "$target":refs/heads/prod-main
