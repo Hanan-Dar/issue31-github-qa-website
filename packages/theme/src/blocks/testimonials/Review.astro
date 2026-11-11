@@ -1,0 +1,70 @@
+---
+// One review: its stars (when the section shows them), the quote, and who said it (with their photo
+// when it has one). `large`: the "One large quote" layout.
+import type { Review } from "@craeft/widgets/testimonials";
+import { reviewDetail } from "@craeft/widgets/testimonials";
+import Icon from "../../components/Icon.astro";
+
+interface Props {
+  review: Review;
+  stars: boolean;
+  photos: boolean;
+  large?: boolean;
+  /** Typed reviews keep the space above the quote whether or not this one has stars (as before widgets). */
+  starRow?: boolean;
+}
+const { review: t, stars, photos, large = false, starRow = stars } = Astro.props;
+const detail = reviewDetail(t);
+const photo = photos ? t.photo : undefined;
+---
+
+{
+  large ? (
+    <figure class="mx-auto mt-10 max-w-3xl text-center">
+      {stars && t.rating && (
+        <p class="flex justify-center gap-1 text-accent-ink [.tone-dark_&]:text-white">
+          <span class="sr-only">Rated {t.rating} out of 5</span>
+          {Array.from({ length: 5 }, (_, i) => <Icon name="Star" class:list={["h-6 w-6", i < (t.rating ?? 0) ? "fill-current" : "opacity-30"]} />)}
+        </p>
+      )}
+      <blockquote class="mt-6 font-heading text-2xl leading-snug text-balance text-ink md:text-3xl [.tone-dark_&]:text-white">
+        <p>“{t.quote}”</p>
+      </blockquote>
+      <figcaption class="mt-8 flex items-center justify-center gap-4 text-left">
+        {photo && <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" class="h-14 w-14 shrink-0 rounded-full object-cover" />}
+        <span>
+          <span class="block font-semibold">{t.name}</span>
+          {detail && <span class="block text-sm text-ink-3 [.tone-dark_&]:text-white/75">{detail}</span>}
+        </span>
+      </figcaption>
+    </figure>
+  ) : (
+    <figure class="flex h-full flex-col">
+      {stars && t.rating && (
+        <p class="flex gap-0.5 text-accent-ink [.tone-dark_&]:text-white">
+          <span class="sr-only">Rated {t.rating} out of 5</span>
+          {Array.from({ length: 5 }, (_, i) => (
+            <Icon name="Star" class:list={["h-5 w-5", i < (t.rating ?? 0) ? "fill-current" : "opacity-30"]} />
+          ))}
+        </p>
+      )}
+      <blockquote class:list={[starRow && "mt-4", "flex-1 text-[1.05rem] text-ink [.tone-dark_&]:text-white"]}>
+        <p>“{t.quote}”</p>
+      </blockquote>
+      {photo ? (
+        <figcaption class="mt-5 flex items-center gap-3 border-t border-line pt-4 [.tone-dark_&]:border-white/15">
+          <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" class="h-11 w-11 shrink-0 rounded-full object-cover" />
+          <span>
+            <span class="block font-semibold">{t.name}</span>
+            {detail && <span class="block text-sm text-ink-3 [.tone-dark_&]:text-white/75">{detail}</span>}
+          </span>
+        </figcaption>
+      ) : (
+        <figcaption class="mt-5 border-t border-line pt-4 [.tone-dark_&]:border-white/15">
+          <span class="block font-semibold">{t.name}</span>
+          {detail && <span class="block text-sm text-ink-3 [.tone-dark_&]:text-white/75">{detail}</span>}
+        </figcaption>
+      )}
+    </figure>
+  )
+}

@@ -1,0 +1,53 @@
+---
+// One picture of a gallery: a link that opens it large (the lightbox; with no script, the picture
+// itself), the picture, its link or nothing, as the section's "Click opens" says; its caption under
+// it or over it on hover; a play mark when it stands for a video.
+import { videoEmbed } from "@craeft/widgets/gallery";
+import { mark } from "../../lib/preview";
+import { type GalleryData, gallerySizes, HOVER, SHAPE } from "./layout";
+
+interface Props {
+  data: GalleryData;
+  picture: NonNullable<GalleryData["pictures"]>[number];
+  /** Masonry: always as it is. */
+  natural?: boolean;
+  /** Where it's kept, for Craeft's "Edit this picture" in previews: "album:<id>:<n>" or "pictures.<n>". */
+  from?: string;
+}
+const { data, picture: p, natural = false, from } = Astro.props;
+const video = p.video ? videoEmbed(p.video) : null;
+const href = data.click === "lightbox" || data.click === "picture" ? (p.video ?? p.src) : data.click === "link" ? p.link : undefined;
+const Link = href ? "a" : "div";
+const box = href ? { href, ...(data.click === "lightbox" ? { "data-lightbox-item": "", "data-caption": p.caption, "data-video": video ?? undefined, "aria-haspopup": "dialog" } : {}) } : {};
+const hover = data.captions === "hover" && !!p.caption;
+---
+
+<figure class="group relative" {...(from ? mark({ picture: from }) : {})}>
+  <Link
+    {...box}
+    class:list={[
+      "relative block overflow-hidden rounded-[var(--radius-card)] bg-ink/5",
+      href && "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary",
+    ]}
+  >
+    <img src={p.src} alt={p.alt} loading="lazy" decoding="async" sizes={gallerySizes(data.columns)} class:list={["w-full object-cover", !natural && SHAPE[data.shape], HOVER[data.hover]]} />
+    {
+      video && (
+        <span class="pointer-events-none absolute inset-0 grid place-items-center" aria-hidden="true">
+          <span class="grid h-14 w-14 place-items-center rounded-full bg-black/60 text-white shadow-lg">
+            <svg viewBox="0 0 24 24" class="ml-1 h-6 w-6 fill-current" focusable="false"><path d="M8 5v14l11-7z" /></svg>
+          </span>
+        </span>
+      )
+    }
+    {video && <span class="sr-only"> (video)</span>}
+    {
+      hover && (
+        <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pt-8 pb-3 text-left text-sm text-white transition-opacity [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
+          {p.caption}
+        </span>
+      )
+    }
+  </Link>
+  {data.captions === "under" && p.caption && <figcaption class="mt-2 text-sm text-ink-3 [.tone-dark_&]:text-white/75">{p.caption}</figcaption>}
+</figure>

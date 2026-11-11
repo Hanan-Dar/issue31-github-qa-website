@@ -1,0 +1,42 @@
+---
+// The blog's posts by year or by month, with how many each has (packages/widgets/src/archive.ts). A
+// year opens its page (/<blog>/year/<year>, routes/blog/year.astro), a month its place on that page.
+// On a page, a section; in a widget area, a column.
+import { archiveOf, periodName } from "@craeft/widgets/archive";
+import type { z } from "astro/zod";
+import site from "virtual:site/config";
+import { publishedPosts } from "../lib/content";
+import { yearPath } from "../lib/posts";
+import { editorMarkers } from "../lib/preview";
+import type { ArchiveBlock } from "./schema";
+import EmptyBox from "./ui/EmptyBox.astro";
+import Widget from "./ui/Widget.astro";
+
+interface Props { data: z.infer<typeof ArchiveBlock>; index: number; place?: "page" | "area"; hid?: string }
+const { data, index, place = "page", hid = `block-${index}` } = Astro.props;
+const sel = site.blog ? archiveOf(await publishedPosts(), data) : { items: [], matched: 0, reason: "The site has no blog." };
+---
+
+{
+  (sel.items.length > 0 || editorMarkers) && (
+    <Widget place={place} tone={data.tone} hid={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead}>
+      {sel.items.length === 0 ? (
+        <EmptyBox what="Nothing to list." reason={sel.reason} />
+      ) : (
+        <ul class:list={["grid gap-2", place === "page" && "max-w-md"]}>
+          {sel.items.map((p) => (
+            <li class="flex items-baseline justify-between gap-4">
+              <a href={yearPath(p.year, p.month)}>{periodName(p, site.locale)}</a>
+              {data.counts && (
+                <span class="text-sm text-ink-3 tabular-nums [.tone-dark_&]:text-white/70">
+                  <span aria-hidden="true">{p.count}</span>
+                  <span class="sr-only">{p.count === 1 ? "1 post" : `${p.count} posts`}</span>
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  )
+}

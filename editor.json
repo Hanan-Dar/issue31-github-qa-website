@@ -1,0 +1,69 @@
+{
+  "$comment": "What Craeft's editor may read and change (paths from the repo root). Craeft also applies its own deny list (CI, Wrangler, packages, secrets) and a code guard.",
+  "rules": [
+    "AGENTS.md"
+  ],
+  "theme": {
+    "template": "trades",
+    "version": "c9bf650d7fbfc0cab36a9c7094325d0cb72f9b16",
+    "widgets": "78cc8671137e43e26cc5563c3d1bd317c35fd26f"
+  },
+  "sites": {
+    "issue31-github-qa": {
+      "root": "sites/main",
+      "allow": [
+        "sites/main/src/content/**",
+        "sites/main/src/data/**",
+        "sites/main/public/media/**",
+        "sites/main/public/favicons/**",
+        "sites/main/site.config.ts",
+        "sites/main/redirects.ts",
+        "sites/main/url-contract.json",
+        "packages/theme/src/styles/**",
+        "packages/theme/src/blocks/**",
+        "packages/theme/src/components/**",
+        "packages/theme/src/layouts/**"
+      ],
+      "readOnly": [
+        "packages/theme/src/routes/**",
+        "packages/theme/src/lib/**",
+        "packages/theme/src/*.ts",
+        "packages/widgets/**"
+      ],
+      "deny": [
+        "sites/main/worker/**",
+        "backend/**",
+        "tools/**"
+      ],
+      "images": "sites/main/public/media/",
+      "shared": [
+        "sites/main/src/data/**",
+        "sites/main/site.config.ts",
+        "packages/theme/**"
+      ],
+      "createTypes": [
+        ".md",
+        ".yaml",
+        ".json",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+        ".avif",
+        ".svg",
+        ".astro",
+        ".css"
+      ],
+      "routes": [
+        {
+          "url": "/",
+          "file": "sites/main/src/content/pages/index.yaml"
+        },
+        {
+          "url": "/{path}",
+          "file": "sites/main/src/content/pages/{path}.yaml"
+        }
+      ]
+    }
+  }
+}

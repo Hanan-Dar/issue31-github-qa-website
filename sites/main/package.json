@@ -1,0 +1,21 @@
+{
+  "name": "@site/main",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "build": "astro build",
+    "preview": "astro build && wrangler dev --port 8787",
+    "check": "astro check && tsc --noEmit -p worker"
+  },
+  "dependencies": {
+    "@site/theme": "workspace:*",
+    "astro": "^7.4.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20261016.1",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.151.1"
+  }
+}

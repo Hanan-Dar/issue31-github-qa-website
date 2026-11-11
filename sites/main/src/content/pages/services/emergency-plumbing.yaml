@@ -1,0 +1,38 @@
+title: "Emergency plumbing"
+seo:
+  title: "Emergency plumber in Leeds | Issue31 GitHub QA"
+  description: "Burst pipes, leaks, blocked drains and no hot water in Leeds: call Issue31 GitHub QA and we'll tell you straight away when we can be there."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: Emergency plumbing
+    lead: "Water where it shouldn't be? Call us and we'll tell you straight away when we can get to you."
+    buttons:
+      - label: Contact us now
+        href: /contact
+    points:
+      - Burst and leaking pipes
+      - Blocked drains and toilets
+      - No heating or hot water
+      - Leaking tanks and cylinders
+
+  - blockType: split
+    title: While you wait for us
+    body: |
+      If water is leaking, turn it off at the stopcock. It's usually under the kitchen sink, or where the water pipe comes into the house.
+
+      If water is near electrics, keep away from them and switch off the power at the fuse box if it's safe to reach.
+    highlight:
+      title: Quick checklist
+      items:
+        - Turn off the water at the stopcock
+        - Switch off electrics near the leak
+        - Move valuables out of the way
+        - Take a photo for us if you can
+
+  - blockType: cta
+    title: Need help now?
+    text: Get in touch and tell us what's happening. We'll call you back as soon as we can.
+    buttons:
+      - label: Contact us
+        href: /contact

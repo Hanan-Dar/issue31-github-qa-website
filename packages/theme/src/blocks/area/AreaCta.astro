@@ -1,0 +1,18 @@
+---
+// A call to action in a widget area: its title, a line and its buttons, on a card (the Call to action
+// block's own fields; on a page it's the dark band instead).
+import type { z } from "astro/zod";
+import type { CtaBlock } from "../schema";
+import Btn from "../ui/Btn.astro";
+
+interface Props { data: z.infer<typeof CtaBlock>; hid: string }
+const { data, hid } = Astro.props;
+---
+
+<section aria-labelledby={hid} class="rounded-[var(--radius-card)] bg-tint p-5 [.tone-dark_&]:bg-white/10">
+  <h2 id={hid} class="text-lg">{data.title}</h2>
+  <p class="mt-2 text-[0.97rem] text-ink-2 [.tone-dark_&]:text-white/85">{data.text}</p>
+  <div class="mt-4 flex flex-wrap gap-2">
+    {data.buttons.map((b, i) => <Btn button={b} fallback={i === 0 ? "primary" : "secondary"} />)}
+  </div>
+</section>

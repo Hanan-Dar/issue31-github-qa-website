@@ -1,0 +1,30 @@
+{
+  "items": [
+    { "label": "Services", "href": "/services" },
+    { "label": "Areas covered", "href": "/areas" },
+    { "label": "Reviews", "href": "/reviews" },
+    { "label": "About", "href": "/about" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "cta": { "label": "Get a quote", "href": "/contact" },
+  "footer": [
+    {
+      "title": "Services",
+      "links": [
+        { "label": "Boiler repairs and servicing", "href": "/services/boiler-repairs" },
+        { "label": "Bathroom installation", "href": "/services/bathroom-installation" },
+        { "label": "Emergency plumbing", "href": "/services/emergency-plumbing" },
+        { "label": "All services", "href": "/services" }
+      ]
+    },
+    {
+      "title": "Company",
+      "links": [
+        { "label": "About us", "href": "/about" },
+        { "label": "Reviews", "href": "/reviews" },
+        { "label": "Areas covered", "href": "/areas" },
+        { "label": "Contact", "href": "/contact" }
+      ]
+    }
+  ]
+}

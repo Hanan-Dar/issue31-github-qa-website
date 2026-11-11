@@ -1,0 +1,42 @@
+---
+// A tag's pages: /<blog path>/tag/<tag>, then /<blog>/tag/<tag>/2 …, its posts newest first. A tag
+// with fewer than MIN_INDEXED posts has its page, but it's noindex (and out of the sitemap): a page
+// listing one post adds nothing for search engines.
+import type { GetStaticPaths } from "astro";
+import site from "virtual:site/config";
+import { tagSlug } from "@craeft/widgets/posts";
+import BlogList from "../../components/BlogList.astro";
+import { publishedPosts } from "../../lib/content";
+import { blogTags, MIN_INDEXED, PAGE_SIZE, pageCount, tagPath } from "../../lib/posts";
+
+export const getStaticPaths = (async () => {
+  const posts = await publishedPosts();
+  return (await blogTags()).flatMap((tag) => {
+    const tagged = posts.filter((p) => (p.data.tags ?? []).some((t) => tagSlug(t) === tag.slug));
+    return Array.from({ length: pageCount(tagged.length, PAGE_SIZE) }, (_, i) => ({
+      params: { tag: tag.slug, page: i ? String(i + 1) : undefined },
+      props: { tag, tagged, page: i + 1 },
+    }));
+  });
+}) satisfies GetStaticPaths;
+
+const { tag, tagged, page } = Astro.props;
+const blog = site.blog!;
+const path = tagPath(tag.name, page);
+const named = `${blog.title}: ${tag.name}`;
+const n = tagged.length;
+const description = `${n} ${n === 1 ? "post" : "posts"} from ${site.name} about ${tag.name}, newest first.`;
+---
+
+<BlogList
+  title={`${named}${page > 1 ? `, page ${page}` : ""} | ${site.name}`}
+  description={description}
+  heading={page > 1 ? `${tag.name}: page ${page}` : tag.name}
+  path={path}
+  crumbs={[{ name: blog.title, path: `/${blog.path}` }, { name: tag.name, path }]}
+  posts={tagged}
+  page={page}
+  pagePath={(p) => tagPath(tag.name, p)}
+  perPage={PAGE_SIZE}
+  noindex={n < MIN_INDEXED}
+/>

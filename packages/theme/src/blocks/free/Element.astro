@@ -1,0 +1,181 @@
+---
+// One element of a free-form section (roadmap 16.1). Static HTML; only tabs run a few lines of
+// script (keyboard and switching), and pictures in a gallery open with a link, no script.
+import Icon from "../../components/Icon.astro";
+import ContactForm from "../../components/ContactForm.astro";
+import { mdBlock, mdInline } from "../../lib/md";
+import type { ElementData } from "../schema";
+import Btn from "../ui/Btn.astro";
+import { mark } from "../../lib/preview";
+import { alignClass, embedUrl, HEADING_SIZE, hideClass, justifyClass, spaceClass } from "./layout";
+
+interface Props { data: ElementData; headingId?: string; /** Unique on the page (tabs' ids). */ uid: string }
+const { data: el, headingId, uid } = Astro.props;
+const hide = hideClass(el.hideOn);
+const Tag = el.element === "heading" ? (`h${el.level}` as "h2" | "h3" | "h4") : "h2";
+const DEFAULT_SIZE = { 2: "h-section", 3: "text-2xl", 4: "text-xl" } as const;
+---
+
+{el.element === "heading" && (
+  <Tag id={headingId} class:list={[el.size ? HEADING_SIZE[el.size] : DEFAULT_SIZE[el.level], alignClass(el.align), hide]} {...mark({ element: "heading" })}>{el.text}</Tag>
+)}
+{el.element === "text" && <div class:list={["prose-site", alignClass(el.align), hide]} set:html={mdBlock(el.body)} {...mark({ element: "text" })} />}
+{el.element === "button" && (
+  <div class:list={["flex", justifyClass(el.align), hide]} {...mark({ element: "button" })}>
+    <Btn button={{ label: el.label, href: el.href, style: el.style }} />
+  </div>
+)}
+{el.element === "image" && (
+  <figure class:list={[hide]} {...mark({ element: "image" })}>
+    <img
+      src={el.src}
+      alt={el.alt}
+      loading="lazy"
+      decoding="async"
+      class:list={["w-full object-cover", el.shape === "rounded" && "rounded-card", el.shape === "circle" && "aspect-square rounded-full"]}
+    />
+    {el.caption && <figcaption class="mt-2 text-sm text-ink-3">{el.caption}</figcaption>}
+  </figure>
+)}
+{el.element === "list" && (
+  <ul class:list={["space-y-3", hide]} {...mark({ element: "list" })}>
+    {el.items.map((it) => (
+      <li class="flex gap-3">
+        <span class="mt-0.5 shrink-0 text-primary-ink [.tone-dark_&]:text-white">
+          <Icon name={it.icon ?? "Check"} class="h-5 w-5" />
+        </span>
+        <span set:html={mdInline(it.text)} />
+      </li>
+    ))}
+  </ul>
+)}
+{el.element === "spacer" && <div aria-hidden="true" class:list={[spaceClass(el.size), hide]} {...mark({ element: "spacer" })} />}
+{el.element === "divider" && <hr class:list={["border-line [.tone-dark_&]:border-white/20", hide]} {...mark({ element: "divider" })} />}
+{el.element === "video" && embedUrl(el.url) && (
+  <div class:list={["aspect-video overflow-hidden rounded-card bg-ink/5", hide]} {...mark({ element: "video" })}>
+    <iframe
+      src={embedUrl(el.url)}
+      title={el.title}
+      loading="lazy"
+      class="h-full w-full"
+      allow="encrypted-media; picture-in-picture; fullscreen"
+      referrerpolicy="strict-origin-when-cross-origin"
+    />
+  </div>
+)}
+{el.element === "gallery" && (
+  <ul
+    class:list={[
+      "grid gap-3",
+      el.columns?.phone === 1 ? "grid-cols-1" : "grid-cols-2",
+      { 2: "md:grid-cols-2", 3: "md:grid-cols-3", 4: "md:grid-cols-4" }[el.columns?.tablet ?? el.columns?.desktop ?? 3],
+      { 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4" }[el.columns?.desktop ?? 3],
+      hide,
+    ]}
+    {...mark({ element: "gallery" })}
+  >
+    {el.images.map((img) => (
+      <li>
+        <a href={img.src} class="block overflow-hidden rounded-card focus-visible:outline-offset-4" aria-label={`${img.alt} (opens the picture)`}>
+          <img src={img.src} alt={img.alt} loading="lazy" decoding="async" class="aspect-square w-full object-cover transition-transform hover:scale-[1.03]" />
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
+{el.element === "map" && (
+  <div class:list={["aspect-[4/3] overflow-hidden rounded-card bg-ink/5 md:aspect-video", hide]} {...mark({ element: "map" })}>
+    <iframe
+      src={`https://www.google.com/maps?q=${encodeURIComponent(el.query)}&output=embed`}
+      title={el.title}
+      loading="lazy"
+      class="h-full w-full"
+      referrerpolicy="no-referrer-when-downgrade"
+    />
+  </div>
+)}
+{el.element === "testimonial" && (
+  <figure class:list={["card p-6 [.tone-dark_&]:bg-white/5", hide]} {...mark({ element: "testimonial" })}>
+    {el.rating && (
+      <p class="flex gap-0.5 text-accent-ink [.tone-dark_&]:text-accent" aria-label={`${el.rating} out of 5 stars`}>
+        {Array.from({ length: 5 }, (_, i) => <Icon name="Star" class={`h-4 w-4 ${i < (el.rating ?? 0) ? "fill-current" : "opacity-30"}`} />)}
+      </p>
+    )}
+    <blockquote class="mt-3 text-lg">“{el.quote}”</blockquote>
+    <figcaption class="mt-4 text-sm">
+      <span class="font-semibold">{el.name}</span>{el.detail && <span class="text-ink-3 [.tone-dark_&]:text-white/70"> · {el.detail}</span>}
+    </figcaption>
+  </figure>
+)}
+{el.element === "counter" && (
+  <p class:list={["text-center", hide]} {...mark({ element: "counter" })}>
+    <span class="block font-heading text-4xl font-semibold text-primary-ink md:text-5xl [.tone-dark_&]:text-white">{el.value}</span>
+    <span class="mt-1 block text-ink-2 [.tone-dark_&]:text-white/80">{el.label}</span>
+  </p>
+)}
+{el.element === "accordion" && (
+  <div class:list={["divide-y divide-line rounded-card border border-line [.tone-dark_&]:divide-white/20 [.tone-dark_&]:border-white/20", hide]} {...mark({ element: "accordion" })}>
+    {el.items.map((it) => (
+      <details class="group px-5 py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+          {it.title}
+          <span class="transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+        </summary>
+        <div class="prose-site mt-3" set:html={mdBlock(it.body)} />
+      </details>
+    ))}
+  </div>
+)}
+{el.element === "tabs" && (
+  <div class:list={[hide]} {...mark({ element: "tabs" })} data-tabs>
+    <div role="tablist" class="flex flex-wrap gap-2 border-b border-line [.tone-dark_&]:border-white/20">
+      {el.items.map((it, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${uid}-tab-${i}`}
+          aria-controls={`${uid}-panel-${i}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          class="-mb-px border-b-2 border-transparent px-3 py-2 font-semibold aria-selected:border-primary aria-selected:text-primary-ink [.tone-dark_&]:aria-selected:text-white"
+        >
+          {it.title}
+        </button>
+      ))}
+    </div>
+    {el.items.map((it, i) => (
+      <div role="tabpanel" id={`${uid}-panel-${i}`} aria-labelledby={`${uid}-tab-${i}`} hidden={i !== 0} tabindex="0" class="prose-site pt-5" set:html={mdBlock(it.body)} />
+    ))}
+  </div>
+)}
+{el.element === "form" && (
+  <div class:list={["card p-6 sm:p-8 [.tone-dark_&]:bg-white [.tone-dark_&]:text-ink", hide]} {...mark({ element: "form" })}>
+    <ContactForm />
+  </div>
+)}
+
+<script>
+  // Tabs: click or arrow keys switch; one panel shows at a time (WAI-ARIA tabs pattern).
+  for (const root of document.querySelectorAll<HTMLElement>("[data-tabs]")) {
+    if (root.dataset.ready) continue;
+    root.dataset.ready = "1";
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const show = (i: number, focus = false) =>
+      tabs.forEach((t, j) => {
+        t.setAttribute("aria-selected", String(i === j));
+        t.tabIndex = i === j ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute("aria-controls") ?? "");
+        if (panel) panel.hidden = i !== j;
+        if (i === j && focus) t.focus();
+      });
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => show(i));
+      t.addEventListener("keydown", (e) => {
+        const next = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : -2;
+        if (next === -2) return;
+        e.preventDefault();
+        show((next + tabs.length) % tabs.length, true);
+      });
+    });
+  }
+</script>

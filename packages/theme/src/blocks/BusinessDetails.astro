@@ -1,0 +1,81 @@
+---
+// The business's name, address, phone, email and opening hours, from its details (site.config.ts,
+// which reads src/data/business.json): the parts the section picks, in its order
+// (packages/widgets/src/business.ts). On a page, a section; in a widget area, a column.
+import { businessParts, groupHours } from "@craeft/widgets/business";
+import { WEB_LINK } from "@craeft/widgets/links";
+import type { z } from "astro/zod";
+import site from "virtual:site/config";
+import Icon from "../components/Icon.astro";
+import { addressLine, formatTime, telHref } from "../lib/format";
+import { editorMarkers } from "../lib/preview";
+import type { BusinessBlock } from "./schema";
+import EmptyBox from "./ui/EmptyBox.astro";
+import Widget from "./ui/Widget.astro";
+
+interface Props { data: z.infer<typeof BusinessBlock>; index: number; place?: "page" | "area"; hid?: string }
+const { data, index, place = "page", hid = `block-${index}` } = Astro.props;
+const parts = businessParts(site, data);
+const runs = groupHours(site.openingHours, { together: data.hours === "grouped" });
+const days = (r: (typeof runs)[number]) => (r.from === r.to ? r.from : `${r.from} to ${r.to}`);
+const times = (r: (typeof runs)[number]) => (r.slots ? r.slots.map((s) => `${formatTime(s.opens)} to ${formatTime(s.closes)}`).join(", ") : "Closed");
+const iconCls = "mt-1 h-4 w-4 shrink-0 text-ink-3 [.tone-dark_&]:text-white/70";
+---
+
+{
+  (parts.length > 0 || editorMarkers) && (
+    <Widget place={place} tone={data.tone} hid={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead}>
+      {parts.length === 0 ? (
+        <EmptyBox what="Nothing to show." reason="Pick what to show under Shows." />
+      ) : (
+        <ul class:list={["grid gap-3", place === "page" && "max-w-md"]}>
+          {parts.map((part) => (
+            <li class="flex items-start gap-2.5">
+              {part === "name" && <p class="font-semibold">{site.legalName ?? site.name}</p>}
+              {part === "address" && (
+                <>
+                  {data.icons && <Icon name="MapPin" class={iconCls} />}
+                  <span>
+                    <span class="sr-only">Address: </span>
+                    {addressLine()}
+                    {data.directions && site.mapUrl && WEB_LINK.test(site.mapUrl) && (
+                      <a href={site.mapUrl} rel="noopener" class="block font-semibold">Get directions</a>
+                    )}
+                  </span>
+                </>
+              )}
+              {part === "phone" && site.contact.phone && (
+                <>
+                  {data.icons && <Icon name="Phone" class={iconCls} />}
+                  <span><span class="sr-only">Phone: </span><a href={telHref(site.contact.phone)}>{site.contact.phone}</a></span>
+                </>
+              )}
+              {part === "email" && (
+                <>
+                  {data.icons && <Icon name="Mail" class={iconCls} />}
+                  <span class="min-w-0"><span class="sr-only">Email: </span><a href={`mailto:${site.contact.email}`} class="break-all">{site.contact.email}</a></span>
+                </>
+              )}
+              {part === "hours" && (
+                <>
+                  {data.icons && <Icon name="Clock" class={iconCls} />}
+                  <table class="w-full text-[0.95rem]">
+                    <caption class="sr-only">Opening hours</caption>
+                    <tbody>
+                      {runs.map((r) => (
+                        <tr>
+                          <th scope="row" class="py-0.5 pr-4 text-left align-top font-medium">{days(r)}</th>
+                          <td class="py-0.5 text-right align-top text-ink-2 [.tone-dark_&]:text-white/85">{times(r)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  )
+}

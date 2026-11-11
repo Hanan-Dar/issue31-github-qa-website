@@ -1,0 +1,84 @@
+---
+// One blog post: src/content/blog/<slug>.md → /<blog path>/<slug>. Its sidebar (the "post-sidebar"
+// widget area, src/content/widget-areas/post-sidebar.yaml) shows only when the site switches it on
+// (`on: true`) and it has widgets: the theme's own look has none.
+import type { GetStaticPaths } from "astro";
+import { type CollectionEntry, getEntry, render } from "astro:content";
+import site from "virtual:site/config";
+import AreaWidgets from "../../blocks/area/AreaWidgets.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { postPath, publishedPosts } from "../../lib/content";
+import { formatDate } from "../../lib/format";
+import { tagSlug } from "@craeft/widgets/posts";
+import { tagPath } from "../../lib/posts";
+import { editorMarkers, mark } from "../../lib/preview";
+import { blogPosting } from "../../seo/jsonld";
+
+export const getStaticPaths = (async () => (await publishedPosts()).map((post) => ({ params: { slug: post.id }, props: { post } }))) satisfies GetStaticPaths;
+
+const { post } = Astro.props as { post: CollectionEntry<"blog"> };
+const { Content } = await render(post);
+const blog = site.blog!;
+const path = postPath(post.id);
+const d = post.data;
+// Its tags with a page (one with no letter or number, "!!!", has none).
+const linked = (d.tags ?? []).filter((t) => tagSlug(t));
+const sidebar = (await getEntry("widget-areas", "post-sidebar"))?.data;
+const widgets = sidebar?.blocks ?? [];
+const withSidebar = !!sidebar?.on && widgets.length > 0;
+// Previews always have the sidebar's place (hidden while it's off or empty), so Craeft's Edit can
+// switch it on and fill it there; the layout's class is named for it (data-craeft-area-host).
+const placed = withSidebar || editorMarkers;
+---
+
+<BaseLayout
+  title={`${d.title} | ${site.name}`}
+  description={d.description}
+  path={path}
+  image={d.image}
+  ogType="article"
+  schema={{
+    crumbs: [{ name: blog.title, path: `/${blog.path}` }, { name: d.title, path }],
+    dateModified: d.updated ?? d.date,
+    nodes: [blogPosting(site, { path, title: d.title, description: d.description, image: d.image, published: d.date, modified: d.updated, author: d.author })],
+  }}
+>
+  <article class:list={[withSidebar && "post-sidebar-on"]} {...(placed ? mark({ "area-host": "post-sidebar-on" }) : {})}>
+    <header class="bg-tint">
+      <div class:list={["container max-w-3xl py-12 lg:py-16", placed && "post-head"]}>
+        <nav aria-label="Breadcrumb" class="mb-6 text-[0.92rem] text-ink-2"><a href="/" class="text-ink-2">Home</a> › <a href={`/${blog.path}`} class="text-ink-2">{blog.title}</a></nav>
+        <h1 class="h-page">{d.title}</h1>
+        <p class="mt-5 text-ink-2">
+          <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>{d.author && <> · {d.author}</>}
+        </p>
+        {
+          linked.length ? (
+            <ul aria-label="Tags" class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm">
+              {linked.map((t) => <li><a href={tagPath(t)}>{t}</a></li>)}
+            </ul>
+          ) : null
+        }
+      </div>
+    </header>
+    {
+      placed ? (
+        <div class="post-body container max-w-3xl py-12 lg:py-16">
+          <div class="min-w-0">
+            {d.image && <img src={d.image} alt={d.imageAlt} sizes="(min-width: 48rem) 48rem, 100vw" class="mb-10 aspect-[16/9] w-full rounded-[var(--radius-card)] object-cover" />}
+            <div class="prose-site"><Content /></div>
+            <p class="mt-12 border-t border-line pt-6"><a href={`/${blog.path}`} class="font-semibold">Back to {blog.title.toLowerCase()}</a></p>
+          </div>
+          <aside aria-label={`More from ${site.name}`} hidden={!withSidebar} class="post-sidebar grid content-start gap-10" {...mark({ area: "post-sidebar" })}>
+            <AreaWidgets area="post-sidebar" blocks={widgets} path={path} current={post.id} />
+          </aside>
+        </div>
+      ) : (
+        <div class="container max-w-3xl py-12 lg:py-16">
+          {d.image && <img src={d.image} alt={d.imageAlt} sizes="(min-width: 48rem) 48rem, 100vw" class="mb-10 aspect-[16/9] w-full rounded-[var(--radius-card)] object-cover" />}
+          <div class="prose-site"><Content /></div>
+          <p class="mt-12 border-t border-line pt-6"><a href={`/${blog.path}`} class="font-semibold">Back to {blog.title.toLowerCase()}</a></p>
+        </div>
+      )
+    }
+  </article>
+</BaseLayout>

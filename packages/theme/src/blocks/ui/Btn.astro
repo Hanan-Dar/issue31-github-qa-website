@@ -1,0 +1,10 @@
+---
+// A button link. A button to a page that's switched off in site.config.ts isn't shown.
+import { linkOn } from "../../lib/content";
+import type { ButtonData } from "../schema";
+interface Props { button: ButtonData; fallback?: "primary" | "secondary" }
+const { button, fallback = "primary" } = Astro.props;
+const external = /^https?:/.test(button.href);
+---
+
+{linkOn(button.href) && <a href={button.href} rel={external ? "noopener" : undefined} class:list={["btn", `btn-${button.style ?? fallback}`]}>{button.label}</a>}

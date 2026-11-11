@@ -1,0 +1,38 @@
+{
+  "name": "@craeft/widgets",
+  "version": "0.5.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "Widgets' behaviour (plan/ux/widgets.md): which items a section set up from the site's own content shows, and in what order. Copied into each site Craeft makes as its own workspace package (packages/widgets, without the tests), which the theme links with workspace:*. No dependencies: tests and type checks use the Craeft repo's.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./options": "./src/options.ts",
+    "./posts": "./src/posts.ts",
+    "./presets": "./src/presets.ts",
+    "./gallery": "./src/gallery.ts",
+    "./testimonials": "./src/testimonials.ts",
+    "./collection": "./src/collection.ts",
+    "./team": "./src/team.ts",
+    "./faq": "./src/faq.ts",
+    "./logos": "./src/logos.ts",
+    "./child-pages": "./src/child-pages.ts",
+    "./pricing": "./src/pricing.ts",
+    "./compare": "./src/compare.ts",
+    "./share": "./src/share.ts",
+    "./tag-list": "./src/tag-list.ts",
+    "./archive": "./src/archive.ts",
+    "./business": "./src/business.ts",
+    "./social": "./src/social.ts",
+    "./site-presets": "./src/site-presets.ts",
+    "./links": "./src/links.ts",
+    "./client/*": "./src/client/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "zod": "^4.6.7"
+  }
+}

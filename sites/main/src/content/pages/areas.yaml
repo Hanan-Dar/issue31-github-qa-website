@@ -1,0 +1,20 @@
+title: "Areas covered"
+seo:
+  title: "Areas we cover around Leeds | Issue31 GitHub QA"
+  description: "Issue31 GitHub QA works in Leeds and the surrounding towns and villages. See the areas we cover, or ask us about yours."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: Areas we cover
+    lead: "We're based in Leeds and work across the surrounding area, so we're never far away."
+
+  - blockType: areas
+    title: Towns and villages we visit
+    lead: "If your area isn't listed, ask anyway: we often travel a little further for larger jobs."
+
+  - blockType: cta
+    title: Is your home in our area?
+    text: Send us your postcode with a few words about the job and we'll let you know.
+    buttons:
+      - label: Ask us
+        href: /contact

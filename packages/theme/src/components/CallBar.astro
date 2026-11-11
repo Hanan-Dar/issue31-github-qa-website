@@ -1,0 +1,31 @@
+---
+// On phones, the ways to get in touch stay at the bottom of the screen (phase 22's review against
+// local-business sites: the phone number one tap away on every page). Call, and the main menu's
+// button (a quote, the menu…) beside it. Not shown from tablets up, where the header has them.
+import site from "virtual:site/config";
+import { navigation } from "virtual:site/data";
+import { linkOn } from "../lib/content";
+import { telHref } from "../lib/format";
+import Icon from "./Icon.astro";
+
+const phone = site.contact?.phone;
+const cta = navigation.cta && linkOn(navigation.cta.href) ? navigation.cta : null;
+---
+
+{
+  (phone || cta) && (
+    <nav class="call-bar sm:hidden" aria-label="Get in touch">
+      {phone && (
+        <a href={telHref(phone)} class="btn btn-primary flex-1">
+          <Icon name="Phone" class="h-5 w-5" />
+          Call
+        </a>
+      )}
+      {cta && (
+        <a href={cta.href} class:list={["btn flex-1", phone ? "btn-secondary" : "btn-primary"]}>
+          {cta.label}
+        </a>
+      )}
+    </nav>
+  )
+}

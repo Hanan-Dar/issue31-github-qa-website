@@ -1,0 +1,67 @@
+---
+// One person: their photo (or initials) in the section's shape, name, role, bio and contact links.
+// `row`: the List layout (the photo beside the words). With the default settings this is exactly
+// the Team block's card as before widgets.
+import { contactLinks, initials, type Person } from "@craeft/widgets/team";
+import Icon from "../../components/Icon.astro";
+
+interface Props {
+  person: Person;
+  shape: "circle" | "rounded" | "square" | "portrait";
+  bio: boolean;
+  contact: boolean;
+  row?: boolean;
+}
+const { person: p, shape, bio, contact, row = false } = Astro.props;
+const portrait = shape === "portrait" && !row;
+const SHAPE = { circle: "rounded-full", rounded: "rounded-[var(--radius-card)]", square: "rounded-none", portrait: "rounded-[var(--radius-card)]" } as const;
+const size = portrait ? "aspect-[3/4] w-full" : row ? "h-24 w-24 shrink-0" : "h-20 w-20";
+const links = contact ? contactLinks(p) : [];
+const LINKEDIN =
+  "M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z";
+const ICON = { email: "Mail", phone: "Phone", website: "Globe" } as const;
+---
+
+{p.photo ? (
+  <img src={p.photo.src} alt={p.photo.alt} loading="lazy" class:list={[size, SHAPE[shape], "object-cover"]} />
+) : (
+  <span class:list={["grid", size, "place-items-center", SHAPE[shape], "bg-primary font-heading", portrait ? "text-5xl" : "text-2xl", "font-semibold text-on-primary"]} aria-hidden="true">
+    {initials(p.name)}
+  </span>
+)}
+{row ? (
+  <div class="min-w-0 flex-1">
+    <h3 class="text-xl">{p.name}</h3>
+    <p class="text-[0.97rem] font-semibold text-primary-ink [.tone-dark_&]:text-white/85">{p.role}</p>
+    {bio && p.bio && <p class="mt-3 max-w-[65ch] text-ink-2 [.tone-dark_&]:text-white/80">{p.bio}</p>}
+  </div>
+) : (
+  <Fragment>
+    <h3 class="mt-5 text-xl">{p.name}</h3>
+    <p class="text-[0.97rem] font-semibold text-primary-ink [.tone-dark_&]:text-white/85">{p.role}</p>
+    {bio && p.bio && <p class="mt-3 text-ink-2 [.tone-dark_&]:text-white/80">{p.bio}</p>}
+  </Fragment>
+)}
+{
+  links.length > 0 && (
+    <ul class:list={["mt-4 flex flex-wrap gap-2", row && "sm:ml-auto sm:mt-0 sm:self-start"]} aria-label={`Contact ${p.name}`}>
+      {links.map((l) => (
+        <li>
+          <a
+            href={l.href}
+            aria-label={l.label}
+            title={l.label}
+            {...(l.kind === "linkedin" || l.kind === "website" ? { rel: "noopener" } : {})}
+            class="inline-grid h-10 w-10 place-items-center rounded-full border border-line bg-white text-ink no-underline transition-colors hover:border-primary hover:text-primary-ink [.tone-dark_&]:border-white/30 [.tone-dark_&]:bg-white/10 [.tone-dark_&]:text-white"
+          >
+            {l.kind === "linkedin" ? (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4" aria-hidden="true" focusable="false"><path d={LINKEDIN} /></svg>
+            ) : (
+              <Icon name={ICON[l.kind]} class="h-4 w-4" />
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}

@@ -1,0 +1,41 @@
+title: "Bathroom installation"
+seo:
+  title: "Bathroom installation in Leeds | Issue31 GitHub QA"
+  description: "New bathrooms and shower rooms in Leeds, planned and fitted by one team, from Issue31 GitHub QA: plumbing, tiling and finishing."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: Bathroom installation
+    lead: "A new bathroom without the hassle of managing several trades: we plan it with you and fit it from start to finish."
+    buttons:
+      - label: Arrange a visit
+        href: /contact
+
+  - blockType: steps
+    title: How a bathroom project works
+    steps:
+      - title: Visit and measure
+        text: We look at the room, talk through what you'd like and measure up.
+      - title: Plan and quote
+        text: A written quote with a clear list of what's included and how long it will take.
+      - title: Fit
+        text: Old suite out, pipework, electrics, tiling and the new suite in.
+      - title: Finish
+        text: Sealed, tested and cleaned, ready to use.
+
+  - blockType: split
+    tone: white
+    title: What we can fit
+    body: |
+      Baths, showers, wet rooms, toilets, basins, vanity units, heated towel rails and tiling. You can choose the suite yourself, or we can suggest some.
+    bullets:
+      - One team from start to finish
+      - A clear timetable before we start
+      - Your home kept clean and tidy each day
+
+  - blockType: cta
+    title: Planning a new bathroom?
+    text: Tell us about the room and what you have in mind, and we'll arrange a visit.
+    buttons:
+      - label: Get a quote
+        href: /contact

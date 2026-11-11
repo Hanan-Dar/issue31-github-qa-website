@@ -1,0 +1,45 @@
+title: "Boiler repairs and servicing"
+seo:
+  title: "Boiler repairs and servicing in Leeds | Issue31 GitHub QA"
+  description: "Boiler breakdowns fixed, annual services and honest advice on replacing an old boiler, from Issue31 GitHub QA in Leeds."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: Boiler repairs and servicing
+    lead: "Heating gone off? We find the fault, explain it, and fix it, usually in one visit."
+    buttons:
+      - label: Book a visit
+        href: /contact
+    points:
+      - Breakdowns and repairs
+      - Annual servicing
+      - Honest repair-or-replace advice
+      - New boilers fitted
+
+  - blockType: split
+    title: What's included
+    body: |
+      A boiler service checks that your boiler is working safely and efficiently, and catches small problems before they become breakdowns. Most manufacturers ask for one every year to keep the warranty valid.
+
+      If your boiler has broken down, we'll find the fault, tell you what it will cost to fix before we start, and carry the common parts with us.
+    bullets:
+      - Safety and efficiency checks
+      - Cleaning and adjusting the parts that need it
+      - A written record of the service
+      - Advice on controls that could cut your bills
+
+  - blockType: faq
+    tone: white
+    title: Questions about boilers
+    items:
+      - question: How often should my boiler be serviced?
+        answer: Once a year. It keeps it safe and efficient, and most warranties require it.
+      - question: Is it worth repairing an old boiler?
+        answer: Often it is. We'll give you the cost of the repair and, if it makes sense, a price for a replacement, so you can decide.
+
+  - blockType: cta
+    title: Book a boiler service or repair
+    text: Tell us the make of your boiler and what it's doing, and we'll get back to you.
+    buttons:
+      - label: Contact us
+        href: /contact

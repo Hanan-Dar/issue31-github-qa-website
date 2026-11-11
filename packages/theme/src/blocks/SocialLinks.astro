@@ -1,0 +1,55 @@
+---
+// The business's profiles (site.config.ts `social`, from src/data/business.json) as icons, names or
+// both (packages/widgets/src/social.ts). On a page, a section; in a widget area, a column.
+import { socialProfiles } from "@craeft/widgets/social";
+import type { z } from "astro/zod";
+import site from "virtual:site/config";
+import SocialIcon from "../components/SocialIcon.astro";
+import { editorMarkers } from "../lib/preview";
+import type { SocialBlock } from "./schema";
+import EmptyBox from "./ui/EmptyBox.astro";
+import Widget from "./ui/Widget.astro";
+
+interface Props { data: z.infer<typeof SocialBlock>; index: number; place?: "page" | "area"; hid?: string }
+const { data, index, place = "page", hid = `block-${index}` } = Astro.props;
+const profiles = socialProfiles(site.social);
+const ICON = { s: "h-4 w-4", m: "h-5 w-5", l: "h-6 w-6" } as const;
+const TILE = { s: "h-9 w-9", m: "h-11 w-11", l: "h-12 w-12" } as const;
+const only = data.style === "icons";
+---
+
+{
+  (profiles.length > 0 || editorMarkers) && (
+    <Widget place={place} tone={data.tone} hid={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead}>
+      {profiles.length === 0 ? (
+        <EmptyBox what="No profiles to show." reason="The business has no social links yet: ask in Chat to add them to its details." />
+      ) : (
+        <ul class:list={[only ? "flex flex-wrap gap-2" : "grid gap-2"]}>
+          {profiles.map((p) => (
+            <li>
+              {only ? (
+                <a
+                  href={p.url}
+                  rel="noopener me"
+                  aria-label={p.name}
+                  title={p.name}
+                  class:list={[
+                    "inline-grid place-items-center rounded-full border border-line text-ink no-underline transition-colors hover:border-ink [.tone-dark_&]:border-white/25 [.tone-dark_&]:text-white [.tone-dark_&]:hover:border-white",
+                    TILE[data.size],
+                  ]}
+                >
+                  <SocialIcon name={p.icon} class={ICON[data.size]} />
+                </a>
+              ) : (
+                <a href={p.url} rel="noopener me" class:list={["inline-flex min-h-6 items-center gap-2.5", data.size === "l" && "text-lg"]}>
+                  {data.style === "both" && <SocialIcon name={p.icon} class={ICON[data.size]} />}
+                  {p.name}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  )
+}

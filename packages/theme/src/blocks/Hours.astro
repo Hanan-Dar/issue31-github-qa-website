@@ -1,0 +1,23 @@
+---
+// "Visit us": opening hours, the address and directions, from site.config.ts.
+import type { z } from "astro/zod";
+import Details from "../components/Details.astro";
+import { mdInline } from "../lib/md";
+import type { HoursBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof HoursBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+---
+
+<Section tone={data.tone} labelledby={hid}>
+  <div class="grid items-start gap-10 lg:grid-cols-2">
+    <div>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      {data.note && <p class="mt-6 text-ink-2 [.tone-dark_&]:text-white/80" set:html={mdInline(data.note)} />}
+    </div>
+    <Details />
+  </div>
+</Section>

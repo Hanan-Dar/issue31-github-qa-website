@@ -1,0 +1,32 @@
+---
+// Cards linking to other pages; titles and text come from those pages (lib/content.ts).
+import type { z } from "astro/zod";
+import Icon from "../components/Icon.astro";
+import type { LinksBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof LinksBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+---
+
+<Section tone={data.tone} labelledby={hid}>
+  <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+  <ul class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+    {
+      data.items.map((it) => (
+        <li>
+          <a href={it.href} class="card group flex h-full flex-col p-6 text-ink no-underline transition-colors hover:border-primary sm:p-7 [.tone-dark_&]:text-white">
+            {it.icon && <span class="icon-tile mb-5"><Icon name={it.icon} /></span>}
+            <span class="font-heading text-xl font-semibold">{it.title}</span>
+            {it.text && <span class="mt-2 flex-1 text-ink-2 [.tone-dark_&]:text-white/80">{it.text}</span>}
+            <span class="mt-5 inline-flex items-center gap-1.5 font-semibold text-primary-ink [.tone-dark_&]:text-white">
+              Read more <Icon name="ArrowRight" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Section>

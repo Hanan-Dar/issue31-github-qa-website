@@ -1,0 +1,15 @@
+---
+// Posts as a carousel (ui/Carousel.astro): one card per item.
+import type { CollectionEntry } from "astro:content";
+import PostCard from "../../components/PostCard.astro";
+import UiCarousel from "../ui/Carousel.astro";
+import { lookOf, type PostsData } from "./layout";
+
+interface Props { data: PostsData; posts: CollectionEntry<"blog">[]; label: string }
+const { data, posts, label } = Astro.props;
+const look = lookOf(data);
+---
+
+<UiCarousel data={data} dots={posts.map((p, i) => `Show ${i + 1}: ${p.data.title}`)} label={label}>
+  {posts.map((p, i) => <li class="carousel-item snap-start" aria-label={`${i + 1} of ${posts.length}`}><PostCard post={p} look={look} /></li>)}
+</UiCarousel>

@@ -1,0 +1,38 @@
+title: "Services"
+seo:
+  title: "Plumbing and heating services in Leeds | Issue31 GitHub QA"
+  description: "Boiler repairs and servicing, bathroom installation and emergency plumbing in Leeds, with clear written quotes from Issue31 GitHub QA."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: Our services
+    lead: "Everything from a quick repair to a complete new bathroom, done by one local team."
+    buttons:
+      - label: Get a free quote
+        href: /contact
+
+  - blockType: links
+    title: What we can help with
+    items:
+      - href: /services/boiler-repairs
+        icon: Flame
+      - href: /services/bathroom-installation
+        icon: Bath
+      - href: /services/emergency-plumbing
+        icon: Wrench
+
+  - blockType: split
+    tone: white
+    title: Something else?
+    body: |
+      We also fit radiators, move pipework, replace taps and toilets, and fix the small jobs that are easy to put off. If it involves water or heating, ask us.
+    button:
+      label: Ask about your job
+      href: /contact
+
+  - blockType: cta
+    title: Not sure what you need?
+    text: Describe the problem and we'll tell you how we'd fix it, and what it would cost.
+    buttons:
+      - label: Contact us
+        href: /contact

@@ -1,0 +1,84 @@
+---
+// The site header: logo, the main menu (src/data/navigation.json) and its button. On phones the
+// menu opens from a button; without JavaScript the links stay reachable in the footer. Its layout
+// is the site's style (look.header): "classic" (logo, menu, button in a row), "centred" (the logo
+// over a centred menu and button) or "minimal" (no bar, the menu as plain words, the button a link).
+import site from "virtual:site/config";
+import { navigation } from "virtual:site/data";
+import { linkOn } from "../lib/content";
+import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
+import MainNav from "./MainNav.astro";
+
+interface Props { pathname: string }
+const { pathname } = Astro.props;
+const items = navigation.items.filter((i) => linkOn(i.href));
+const active = (href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
+const layout = site.look?.header ?? "classic";
+const centred = layout === "centred";
+const minimal = layout === "minimal";
+---
+
+<header class:list={["site-header sticky top-0 z-50 backdrop-blur", minimal ? "bg-page/95" : "border-b border-line bg-white/95"]} data-header>
+  <div class:list={["container flex h-[4.5rem] items-center justify-between gap-6", centred && "lg:h-auto lg:flex-col lg:gap-2 lg:pt-5 lg:pb-3"]}>
+    <Logo />
+    {!centred && <MainNav items={items} pathname={pathname} minimal={minimal} />}
+    <div class:list={["flex items-center gap-2", centred && "lg:gap-4"]}>
+      {centred && <MainNav items={items} pathname={pathname} />}
+      {
+        linkOn(navigation.cta.href) &&
+          (minimal ? (
+            <a href={navigation.cta.href} class="hidden items-center gap-1.5 font-semibold text-primary-ink no-underline hover:underline sm:inline-flex">
+              {navigation.cta.label}
+              <Icon name="ArrowRight" class="h-4 w-4" />
+            </a>
+          ) : (
+            <a href={navigation.cta.href} class="btn btn-primary btn-sm hidden sm:inline-flex">{navigation.cta.label}</a>
+          ))
+      }
+      <button
+        type="button"
+        class="inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-white text-ink lg:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-button
+      >
+        <span class="sr-only" data-menu-label>Open menu</span>
+        <Icon name="Menu" class="h-5 w-5" />
+      </button>
+    </div>
+  </div>
+  <nav id="mobile-menu" aria-label="Main (phone)" class="hidden border-t border-line bg-white lg:hidden" data-menu>
+    <ul class="container divide-y divide-line py-2">
+      {
+        items.map((item) => (
+          <li>
+            <a href={item.href} aria-current={active(item.href) ? "page" : undefined} class="block py-3.5 text-lg font-medium text-ink no-underline">
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+      {linkOn(navigation.cta.href) && <li class="py-4"><a href={navigation.cta.href} class="btn btn-primary w-full">{navigation.cta.label}</a></li>}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>("[data-header]");
+  const button = header?.querySelector<HTMLButtonElement>("[data-menu-button]");
+  const menu = header?.querySelector<HTMLElement>("[data-menu]");
+  const label = header?.querySelector<HTMLElement>("[data-menu-label]");
+  const set = (open: boolean) => {
+    menu?.classList.toggle("hidden", !open);
+    button?.setAttribute("aria-expanded", String(open));
+    if (label) label.textContent = open ? "Close menu" : "Open menu";
+  };
+  button?.addEventListener("click", () => set(button.getAttribute("aria-expanded") !== "true"));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && button?.getAttribute("aria-expanded") === "true") {
+      set(false);
+      button.focus();
+    }
+  });
+</script>

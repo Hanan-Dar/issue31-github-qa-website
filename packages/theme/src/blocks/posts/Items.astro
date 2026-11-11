@@ -1,0 +1,56 @@
+---
+// A Posts section's list: a grid of cards, a list (picture beside the words), picture tiles, a
+// compact list of titles and dates, or the column beside a featured post. Items past `visible` wait
+// for "Load more" (hidden, still in the HTML); with filter buttons each says its tags.
+import type { CollectionEntry } from "astro:content";
+import { tagSlug } from "@craeft/widgets/posts";
+import PostCard from "../../components/PostCard.astro";
+import { postPath } from "../../lib/content";
+import { formatDate } from "../../lib/format";
+import { mark } from "../../lib/preview";
+import { columnsClass, ENTRANCE, GAP, lookOf, type PostsData } from "./layout";
+
+interface Props {
+  data: PostsData;
+  posts: CollectionEntry<"blog">[];
+  layout: "grid" | "list" | "tiles" | "compact" | "side";
+  /** How many show before "Load more". */
+  visible?: number;
+  class?: string;
+}
+const { data, posts, layout, visible = posts.length, class: cls = "mt-10" } = Astro.props;
+const look = lookOf(data);
+const card =
+  layout === "tiles"
+    ? { ...look, picturePosition: "behind" as const }
+    : layout === "list" && look.picturePosition !== "behind"
+      ? { ...look, picturePosition: "left" as const }
+      : layout === "side"
+        ? { ...look, picturePosition: look.picturePosition === "behind" ? ("behind" as const) : ("left" as const), titleSize: "s" as const, summaryLength: "one" as const }
+        : look;
+const listClass =
+  layout === "compact"
+    ? "divide-y divide-line border-y border-line [.tone-dark_&]:divide-white/15 [.tone-dark_&]:border-white/15"
+    : ["grid", GAP[data.gap], layout === "grid" || layout === "tiles" ? columnsClass(data.columns) : [], !data.equalHeights && layout === "grid" && "items-start"];
+const TITLE = { s: "text-base", m: "text-lg", l: "text-xl" } as const;
+const tags = (p: CollectionEntry<"blog">) => (data.filter ? [...new Set((p.data.tags ?? []).map(tagSlug).filter(Boolean))].join(" ") : undefined);
+---
+
+<ul class:list={[cls, listClass]}>
+  {
+    posts.map((p, i) => (
+      <li hidden={i >= visible} data-tags={tags(p)} class:list={[data.filter && "data-off:hidden", ENTRANCE[data.entrance]]}>
+        {layout === "compact" ? (
+          <article {...mark({ post: p.id })} class="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4">
+            <h3 class={TITLE[data.titleSize]}>
+              <a href={postPath(p.id)} class="text-ink no-underline after:absolute after:inset-0 hover:underline [.tone-dark_&]:text-white">{p.data.title}</a>
+            </h3>
+            <time datetime={p.data.date.toISOString()} class="text-sm text-ink-3 [.tone-dark_&]:text-white/75">{formatDate(p.data.date)}</time>
+          </article>
+        ) : (
+          <PostCard post={p} look={card} />
+        )}
+      </li>
+    ))
+  }
+</ul>

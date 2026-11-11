@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The site: static pages built by Astro (dist), with a small Worker in front for redirects and
+  // the form (worker/index.ts). Workers Builds builds and deploys it from prod-main.
+  "name": "issue31-github-qa-www",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash",
+    // The Worker runs first (redirects and trailing slashes in one hop; on previews, Craeft's live
+    // mode, which shows a draft's new pictures and fonts too). Build output, with hashed names,
+    // is served straight from the files.
+    "run_worker_first": ["/*", "!/_astro/*"]
+  },
+  // The contact form goes to the backend Worker (backend/). Previews inherit none of this, so a
+  // form sent from a preview can't reach the inbox.
+  "services": [{ "binding": "BACKEND", "service": "issue31-github-qa-www-backend" }],
+  "observability": { "enabled": true },
+  "workers_dev": true,
+  // Every other branch gets a preview address (Craeft's drafts).
+  "preview_urls": true,
+  // Where /admin sends people: Craeft (the kit, worker/editor-kit.ts).
+  "vars": { "EDITOR_ORIGIN": "https://app.craeft.org" },
+  // Previews switch the kit on and reach Craeft through its gateway (with the EDITOR_SITE_KEY secret).
+  "previews": { "vars": { "EDITOR_ENABLED": "true", "EDITOR_URL": "https://gateway.craeft.org", "EDITOR_ORIGIN": "https://app.craeft.org" } }
+}

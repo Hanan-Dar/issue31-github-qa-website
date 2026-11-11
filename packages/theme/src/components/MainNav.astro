@@ -1,0 +1,26 @@
+---
+// The main menu's links on wide screens (the header's layout decides where it sits).
+interface Props { items: { label: string; href: string }[]; pathname: string; minimal?: boolean }
+const { items, pathname, minimal } = Astro.props;
+const active = (href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
+---
+
+<nav aria-label="Main" class:list={["hidden items-center lg:flex", minimal ? "gap-6" : "gap-1"]}>
+  {
+    items.map((item) => (
+      <a
+        href={item.href}
+        aria-current={active(item.href) ? "page" : undefined}
+        class:list={[
+          "text-[0.97rem] font-medium no-underline",
+          minimal
+            ? "py-2 underline-offset-[0.35em] hover:underline aria-[current=page]:underline"
+            : "rounded-full px-3.5 py-2 transition-colors hover:bg-tint",
+          active(item.href) ? "text-primary-ink" : "text-ink-2",
+        ]}
+      >
+        {item.label}
+      </a>
+    ))
+  }
+</nav>

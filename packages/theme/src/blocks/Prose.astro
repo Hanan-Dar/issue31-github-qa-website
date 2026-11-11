@@ -1,0 +1,18 @@
+---
+// Plain text: paragraphs, lists, tables (Markdown).
+import type { z } from "astro/zod";
+import { mdBlock } from "../lib/md";
+import type { ProseBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import Eyebrow from "./ui/Eyebrow.astro";
+
+interface Props { data: z.infer<typeof ProseBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+---
+
+<Section tone={data.tone} labelledby={data.title ? hid : undefined}>
+  {data.eyebrow && <Eyebrow text={data.eyebrow} />}
+  {data.title && <h2 id={hid} class:list={["h-section", data.eyebrow && "mt-3"]}>{data.title}</h2>}
+  <div class:list={["prose-site", data.title && "mt-6"]} set:html={mdBlock(data.body)} />
+</Section>

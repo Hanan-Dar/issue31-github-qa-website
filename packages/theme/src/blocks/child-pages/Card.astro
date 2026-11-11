@@ -1,0 +1,49 @@
+---
+// One page's card: its picture (if shown), title, text and a "Read more" link. `row`: the List layout.
+import type { PageCard } from "@craeft/widgets/child-pages";
+import Icon from "../../components/Icon.astro";
+
+interface Props {
+  page: PageCard;
+  cardStyle: "plain" | "bordered" | "raised";
+  pictures: boolean;
+  text: boolean;
+  linkText?: string;
+  row?: boolean;
+  /** Other cards beside it have pictures: one without gets a plain tinted space, so the row lines up. */
+  fill?: boolean;
+}
+const { page: p, cardStyle, pictures, text, linkText, row = false, fill = false } = Astro.props;
+const image = pictures ? p.image : undefined;
+const card = cardStyle === "plain" ? "" : cardStyle === "bordered" ? "card shadow-none" : "card";
+const more = linkText?.trim() || "Read more";
+---
+
+{
+  row ? (
+    <a href={p.path} class:list={["group flex items-start gap-5 text-ink no-underline [.tone-dark_&]:text-white", card ? [card, "p-4 sm:p-5 hover:border-primary"] : "py-5"]}>
+      {image && <img src={image.src} alt="" loading="lazy" decoding="async" class="aspect-[4/3] w-24 shrink-0 rounded-[calc(var(--radius-card)*0.6)] object-cover sm:w-36" />}
+      <span class="min-w-0 flex-1">
+        <span class="block font-heading text-xl font-semibold group-hover:text-primary-ink [.tone-dark_&]:group-hover:text-white">{p.title}</span>
+        {text && p.text && <span class="mt-1.5 block text-ink-2 [.tone-dark_&]:text-white/80">{p.text}</span>}
+      </span>
+      <Icon name="ArrowRight" class="mt-1.5 h-5 w-5 shrink-0 text-primary-ink transition-transform group-hover:translate-x-0.5 [.tone-dark_&]:text-white" />
+    </a>
+  ) : (
+    <a href={p.path} class:list={["group flex h-full flex-col text-ink no-underline transition-colors [.tone-dark_&]:text-white", card && [card, "overflow-hidden hover:border-primary"]]}>
+      {!image && fill && <span aria-hidden="true" class:list={["block aspect-[16/9] bg-tint [.tone-dark_&]:bg-white/10", !card && "rounded-[var(--radius-card)]"]} />}
+      {image && (
+        <span class:list={["block overflow-hidden", !card && "rounded-[var(--radius-card)]"]}>
+          <img src={image.src} alt="" loading="lazy" decoding="async" class="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none" />
+        </span>
+      )}
+      <span class:list={["flex flex-1 flex-col", card ? "p-6 sm:p-7" : image ? "pt-5" : ""]}>
+        <span class="font-heading text-xl font-semibold">{p.title}</span>
+        {text && p.text && <span class="mt-2 flex-1 text-ink-2 [.tone-dark_&]:text-white/80">{p.text}</span>}
+        <span class="mt-5 inline-flex items-center gap-1.5 font-semibold text-primary-ink [.tone-dark_&]:text-white">
+          {more} <Icon name="ArrowRight" class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </span>
+    </a>
+  )
+}

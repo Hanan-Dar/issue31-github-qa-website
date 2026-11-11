@@ -1,0 +1,13 @@
+title: "Contact"
+seo:
+  title: "Contact Issue31 GitHub QA | Get a quote"
+  description: "Get in touch with Issue31 GitHub QA in Leeds for a free, written quote. Send us a message, email or call."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: Get in touch
+    lead: "Tell us about the job and we'll get back to you, usually within one working day."
+
+  - blockType: contact
+    title: Send us a message
+    lead: "A photo or two of the problem helps: reply to our email with them once we're in touch."

@@ -1,0 +1,72 @@
+---
+// Craeft's Design view (roadmap 16.2), in `astro dev` only (the integration injects it there): POST
+// { blocks, page?: { path?, commit?, area? } } gives the blocks drawn by the theme, with the editor
+// markers (a widget area's, when `area` names one of AREAS: drawn as its columns), after a <style> holding
+// the site's CSS (its colours and the theme's stylesheet; fonts fall back to the system's). Craeft
+// draws that in its canvas. Reached only through Craeft's live preview container.
+import site from "virtual:site/config";
+import AreaWidgets from "../blocks/area/AreaWidgets.astro";
+import BlockRenderer from "../blocks/BlockRenderer.astro";
+import { describeProblem } from "../blocks/problem";
+import { AREAS, AreaBlock, type AreaName, PageBlock } from "../blocks/schema";
+import { postPath, publishedPosts } from "../lib/content";
+import { expandSaved, postSelections } from "../lib/posts";
+import { colourVars, FONTS, lookVars } from "../site-config";
+import globalCss from "../styles/global.css?inline";
+
+export const prerender = false;
+
+if (Astro.request.method !== "POST") return new Response("POST { blocks } here.", { status: 405 });
+const body = (await Astro.request.json().catch(() => null)) as { blocks?: unknown[]; page?: { path?: unknown; commit?: unknown; area?: unknown } } | null;
+// A widget area's widgets (the footer's, a post's sidebar), or a page's sections.
+const area = typeof body?.page?.area === "string" && Object.hasOwn(AREAS, body.page.area) ? (body.page.area as AreaName) : undefined;
+// Each section checked as the build checks it (which also fills in its defaults); one with a
+// problem is drawn as a note, so the rest of the page still shows.
+const blocks = (Array.isArray(body?.blocks) ? body.blocks : []).map((b) => {
+  const schema = area ? AreaBlock : PageBlock;
+  const r = schema.safeParse(b);
+  return r.success ? { ok: true as const, data: r.data } : { ok: false as const, problem: r.error.issues[0] ? describeProblem(schema, b, r.error.issues[0]) : "not valid" };
+});
+// `blocks` is the whole page, so Posts sections are chosen for the page at once ("Not already shown
+// on this page", the shuffle), as the build does; each is then drawn alone. The page's address and
+// commit, when sent, start the shuffle where the build's does.
+const str = (v: unknown) => (typeof v === "string" ? v : undefined);
+// A missing saved section fails only its own block (below); the others are then chosen block by block.
+const path = str(body?.page?.path);
+const commit = str(body?.page?.commit);
+// On a post's page, that post (for "Not the post you're on").
+const current = path ? (await publishedPosts()).find((p) => postPath(p.id) === path)?.id : undefined;
+const selections = area
+  ? await postSelections(blocks.map((b) => (b.ok ? (b.data as AreaBlock) : undefined)), { path, commit, current }).catch(() => undefined)
+  : await expandSaved(blocks.map((b) => (b.ok ? (b.data as PageBlock) : undefined)))
+      .then((all) => postSelections(all, { path, commit }))
+      .catch(() => undefined);
+const stack = (name: keyof typeof FONTS) => {
+  const f = FONTS[name];
+  const fallback = f.fallback === "serif" ? 'Georgia, "Times New Roman", serif' : 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
+  return f.family ? `"${f.family}", ${fallback}` : fallback;
+};
+const vars = Object.entries({ ...colourVars(site.colours), ...lookVars(site.look), "--font-site-heading": stack(site.fonts.heading), "--font-site-body": stack(site.fonts.body) })
+  .map(([k, v]) => `${k}: ${v};`)
+  .join(" ");
+const css = `:root { ${vars} }\n${globalCss}`;
+---
+
+<style is:inline set:html={css} />
+<div data-craeft-canvas>
+  {
+    blocks.map((b, i) =>
+      b.ok ? (
+        area ? (
+          <AreaWidgets area={area} blocks={[b.data as AreaBlock]} offset={i} selections={selections} path={path} commit={commit} current={current} />
+        ) : (
+          <BlockRenderer blocks={[b.data as PageBlock]} offset={i} selections={selections} path={path} commit={commit} />
+        )
+      ) : (
+        <div data-craeft-block={i} data-craeft-type="problem" style="padding: 2rem; margin: 1rem; border: 2px dashed #b91c1c; color: #b91c1c; font: 15px system-ui">
+          Section {i + 1} can't be drawn yet: {b.problem}
+        </div>
+      ),
+    )
+  }
+</div>

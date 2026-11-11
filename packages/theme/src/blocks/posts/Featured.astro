@@ -1,0 +1,25 @@
+---
+// "Featured": the first post large, the rest beside it (left) or in a grid under it (top).
+import type { CollectionEntry } from "astro:content";
+import PostCard from "../../components/PostCard.astro";
+import Items from "./Items.astro";
+import { ENTRANCE, GAP, lookOf, type PostsData } from "./layout";
+
+interface Props { data: PostsData; posts: CollectionEntry<"blog">[]; visible: number }
+const { data, posts, visible } = Astro.props;
+const [first, ...rest] = posts;
+const look = lookOf(data);
+const top = data.featuredSide === "top";
+const twoThirds = !top && data.featuredWidth === "two-thirds";
+---
+
+{
+  first && (
+    <div class:list={["mt-10 grid", GAP[data.gap], top ? "" : twoThirds ? "lg:grid-cols-3" : "lg:grid-cols-2"]}>
+      <div class:list={[twoThirds && "lg:col-span-2", ENTRANCE[data.entrance]]}>
+        <PostCard post={first} look={top && look.picturePosition === "top" ? { ...look, picturePosition: "left" } : look} large />
+      </div>
+      {rest.length > 0 && <Items data={data} posts={rest} layout={top ? "grid" : "side"} visible={visible - 1} class="" />}
+    </div>
+  )
+}

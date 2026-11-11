@@ -1,0 +1,66 @@
+---
+// The people: a photo (or their initials), name, role, a short bio and contact links. Typed in the
+// section, or the site's team (src/content/team/) chosen by Craeft's widgets (packages/widgets,
+// plan/ux/widgets.md); as cards (the default, exactly as before widgets), a carousel or a list.
+import { getCollection } from "astro:content";
+import { type Person as PersonData, selectPeople } from "@craeft/widgets/team";
+import type { z } from "astro/zod";
+import { editorMarkers } from "../lib/preview";
+import { pageSeed } from "../lib/posts";
+import { columnsClass, GAP } from "./posts/layout";
+import type { TeamBlock } from "./schema";
+import Person from "./team/Person.astro";
+import UiCarousel from "./ui/Carousel.astro";
+import Empty from "./ui/Empty.astro";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof TeamBlock>; index: number; page?: { path?: string; commit?: string } }
+const { data, index, page } = Astro.props;
+const hid = `block-${index}`;
+const collection = data.show === "collection" ? await getCollection("team") : [];
+const sel = selectPeople<PersonData>(data, collection, { seed: pageSeed(page) });
+const people = sel.items;
+const layout = data.layout;
+const portrait = data.photoShape === "portrait";
+const card = { plain: "", bordered: "card shadow-none p-6 sm:p-7", raised: "card p-6 sm:p-7" }[data.cardStyle];
+// Left as it was, the grid is the Team block's before widgets (two columns from small screens).
+const columns = data.columns ? columnsClass(data.columns) : ["sm:grid-cols-2", "lg:grid-cols-3"];
+const look = { shape: data.photoShape, bio: data.bio, contact: data.contact };
+---
+
+{
+  people.length > 0 && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      {layout === "carousel" ? (
+        <UiCarousel data={data} dots={people.map((p, i) => `Show ${i + 1}: ${p.name}`)} label={data.title}>
+          {people.map((p, i) => (
+            <li class="carousel-item snap-start" aria-label={`${i + 1} of ${people.length}`}>
+              <div class:list={[card || "flex flex-col", card && "h-full"]}>
+                <Person person={p} {...look} />
+              </div>
+            </li>
+          ))}
+        </UiCarousel>
+      ) : layout === "list" ? (
+        <ul class:list={["mt-10 grid", GAP[data.gap], data.cardStyle === "plain" && "divide-y divide-line [.tone-dark_&]:divide-white/15"]}>
+          {people.map((p) => (
+            <li class:list={["flex flex-col gap-5 sm:flex-row sm:items-start", card, data.cardStyle === "plain" && "pt-5 first:pt-0"]}>
+              <Person person={p} {...look} shape={portrait ? "rounded" : data.photoShape} row />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul class:list={["mt-10 grid", GAP[data.gap], columns, !data.equalHeights && "items-start"]}>
+          {people.map((p) => (
+            <li class={card || undefined}>
+              <Person person={p} {...look} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  )
+}
+{people.length === 0 && editorMarkers && <Empty tone={data.tone} hid={hid} data={data} what="No people show." reason={sel.reason} />}

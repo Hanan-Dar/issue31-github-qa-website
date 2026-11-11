@@ -1,0 +1,10 @@
+---
+// The short line above a title, with the icon the site's style picks (look.eyebrow.icon), if any.
+import site from "virtual:site/config";
+import Icon from "../../components/Icon.astro";
+interface Props { text: string; class?: string }
+const { text, class: cls } = Astro.props;
+const icon = site.look?.eyebrow?.icon;
+---
+
+<p class:list={["eyebrow", icon && "inline-flex items-center gap-2", cls]}>{icon && <Icon name={icon} class="eyebrow-icon" />}{text}</p>

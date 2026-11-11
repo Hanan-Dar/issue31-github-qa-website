@@ -1,0 +1,110 @@
+---
+// The contact form. It posts JSON to /api/enquiry (the site Worker passes it to the backend
+// Worker, which checks Turnstile, stores the enquiry and sends it on). Turnstile is Cloudflare's
+// spam check; without a site key in site.config.ts the form isn't shown, only the email address.
+import site from "virtual:site/config";
+import { telHref } from "../lib/format";
+
+// Cloudflare's published always-pass test key, for `astro dev` only.
+const DEV_KEY = "1x00000000000000000000AA";
+const siteKey = site.forms.turnstileSiteKey ?? (import.meta.env.DEV ? DEV_KEY : undefined);
+const field = "mt-1.5 block w-full rounded-xl border border-ink/25 bg-white px-4 py-3 text-base text-ink placeholder:text-ink-3 focus:border-primary-ink";
+const label = "block text-[0.95rem] font-semibold text-ink";
+---
+
+{
+  siteKey ? (
+    <form class="grid gap-5" novalidate data-enquiry-form>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="enquiry-name" class={label}>Your name</label>
+          <input id="enquiry-name" name="name" type="text" autocomplete="name" required maxlength="120" class={field} />
+        </div>
+        <div>
+          <label for="enquiry-phone" class={label}>Phone <span class="font-normal text-ink-3">(optional)</span></label>
+          <input id="enquiry-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" class={field} />
+        </div>
+      </div>
+      <div>
+        <label for="enquiry-email" class={label}>Email</label>
+        <input id="enquiry-email" name="email" type="email" autocomplete="email" required maxlength="200" class={field} />
+      </div>
+      <div>
+        <label for="enquiry-message" class={label}>How can we help?</label>
+        <textarea id="enquiry-message" name="message" rows="5" required maxlength="5000" class={field} />
+      </div>
+      {/* Left empty by people; bots fill it in. */}
+      <div class="hidden" aria-hidden="true">
+        <label for="enquiry-website">Leave this empty</label>
+        <input id="enquiry-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <div class="flex items-start gap-3">
+        <input id="enquiry-consent" name="consent" type="checkbox" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--brand-primary-ink)]" />
+        <label for="enquiry-consent" class="text-[0.95rem] text-ink-2">I'm happy for {site.name} to use these details to reply to my enquiry.</label>
+      </div>
+      <div class="cf-turnstile" data-sitekey={siteKey} data-size="flexible" />
+      <div>
+        <button type="submit" class="btn btn-primary">Send enquiry</button>
+      </div>
+      <p role="status" aria-live="polite" class="text-[0.97rem] font-medium empty:hidden" data-enquiry-status />
+    </form>
+  ) : (
+    <div class="card p-6">
+      <p class="font-semibold text-ink">Email us and we'll get back to you.</p>
+      <p class="mt-2">
+        <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+        {site.contact.phone && (
+          <>
+            {" "}or call <a href={telHref(site.contact.phone)}>{site.contact.phone}</a>
+          </>
+        )}
+      </p>
+    </div>
+  )
+}
+
+{siteKey && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-enquiry-form]");
+  const status = form?.querySelector<HTMLElement>("[data-enquiry-status]");
+  const say = (text: string, ok: boolean) => {
+    if (!status) return;
+    status.textContent = text;
+    status.classList.toggle("text-primary-ink", ok);
+    status.classList.toggle("text-red-700", !ok);
+  };
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
+    if (button) button.disabled = true;
+    say("Sending…", true);
+    try {
+      const res = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.get("name"),
+          email: data.get("email"),
+          phone: data.get("phone"),
+          message: data.get("message"),
+          consent: data.get("consent") === "on",
+          website: data.get("website"),
+          token: data.get("cf-turnstile-response"),
+          page: location.pathname,
+        }),
+      });
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(body.error ?? "Something went wrong. Please try again, or email us.");
+      form.reset();
+      say("Thank you. Your enquiry has been sent and we'll be in touch soon.", true);
+    } catch (err) {
+      say(err instanceof Error ? err.message : "Something went wrong. Please try again, or email us.", false);
+      (window as { turnstile?: { reset: () => void } }).turnstile?.reset();
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+</script>

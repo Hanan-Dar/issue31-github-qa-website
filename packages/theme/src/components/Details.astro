@@ -1,0 +1,58 @@
+---
+// How to reach the business: email, phone, address with directions, and opening hours (all from
+// site.config.ts). Used by the contact and hours blocks.
+import site from "virtual:site/config";
+import { addressLine, telHref, weekHours } from "../lib/format";
+import Icon from "./Icon.astro";
+
+interface Props { hours?: boolean; contact?: boolean }
+const { hours = true, contact = true } = Astro.props;
+const address = addressLine();
+---
+
+<div class="card grid gap-6 p-6 sm:p-8">
+  {
+    contact && (
+      <ul class="grid gap-4">
+        <li class="flex items-start gap-3">
+          <span class="icon-tile h-10 w-10"><Icon name="Mail" class="h-5 w-5" /></span>
+          <span><span class="block text-sm font-semibold text-ink-3 [.tone-dark_&]:text-white/75">Email</span><a href={`mailto:${site.contact.email}`} class="break-all">{site.contact.email}</a></span>
+        </li>
+        {site.contact.phone && (
+          <li class="flex items-start gap-3">
+            <span class="icon-tile h-10 w-10"><Icon name="Phone" class="h-5 w-5" /></span>
+            <span><span class="block text-sm font-semibold text-ink-3 [.tone-dark_&]:text-white/75">Phone</span><a href={telHref(site.contact.phone)}>{site.contact.phone}</a></span>
+          </li>
+        )}
+        {address && (
+          <li class="flex items-start gap-3">
+            <span class="icon-tile h-10 w-10"><Icon name="MapPin" class="h-5 w-5" /></span>
+            <span>
+              <span class="block text-sm font-semibold text-ink-3 [.tone-dark_&]:text-white/75">Address</span>
+              <span class="block">{address}</span>
+              {site.mapUrl && <a href={site.mapUrl} rel="noopener" class="font-semibold">Get directions</a>}
+            </span>
+          </li>
+        )}
+      </ul>
+    )
+  }
+  {
+    hours && site.openingHours.length > 0 && (
+      <div class:list={[contact && "border-t border-line pt-6 [.tone-dark_&]:border-white/15"]}>
+        <p class="flex items-center gap-2 font-semibold text-ink [.tone-dark_&]:text-white"><Icon name="Clock" class="h-5 w-5" />Opening hours</p>
+        <table class="mt-3 w-full text-[0.97rem]">
+          <caption class="sr-only">Opening hours</caption>
+          <tbody>
+            {weekHours().map((d) => (
+              <tr class="border-b border-line last:border-0 [.tone-dark_&]:border-white/15">
+                <th scope="row" class="py-2 pr-4 text-left font-medium">{d.day}</th>
+                <td class="py-2 text-right text-ink-2 [.tone-dark_&]:text-white/85">{d.text}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+</div>

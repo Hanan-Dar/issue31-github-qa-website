@@ -1,0 +1,32 @@
+---
+// One line of a post card's details (date, author, tags, reading time, in the order given), split by
+// " · ". Tags link to their pages, above the card's own link.
+import type { CollectionEntry } from "astro:content";
+import { formatDate } from "../lib/format";
+import { tagSlug } from "@craeft/widgets/posts";
+import { tagPath } from "../lib/posts";
+
+interface Props { post: CollectionEntry<"blog">; parts: string[]; minutes?: number; class: string }
+const { post, parts, minutes, class: cls } = Astro.props;
+const d = post.data;
+---
+
+<p class={cls}>
+  {
+    parts.map((p, k) => (
+      <>
+        {k > 0 && " · "}
+        {p === "date" && <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>}
+        {p === "author" && d.author}
+        {p === "readingTime" && `${minutes} min read`}
+        {p === "tags" &&
+          d.tags?.filter((t) => tagSlug(t)).map((t, j) => (
+            <>
+              {j > 0 && ", "}
+              <a href={tagPath(t)} class="relative z-10 text-inherit">{t}</a>
+            </>
+          ))}
+      </>
+    ))
+  }
+</p>

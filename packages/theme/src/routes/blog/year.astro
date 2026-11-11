@@ -1,0 +1,64 @@
+---
+// A year's posts: /<blog path>/year/<year>, by month (newest first), each month with its anchor
+// (#2026-03) that an Archive's months link to. Built only while a page, saved section or widget area
+// has an Archive (lib/posts.ts usesArchive), so these come and go: like tag pages, they're kept out of
+// the URL contract (tools/lib.mjs `listing`). A year with fewer than MIN_INDEXED posts is noindex.
+import { monthName, postYears, yearPosts } from "@craeft/widgets/archive";
+import type { GetStaticPaths } from "astro";
+import site from "virtual:site/config";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { postPath, publishedPosts } from "../../lib/content";
+import { formatDate } from "../../lib/format";
+import { MIN_INDEXED, usesArchive, yearPath } from "../../lib/posts";
+import { itemList } from "../../seo/jsonld";
+
+export const getStaticPaths = (async () => {
+  if (!(await usesArchive())) return [];
+  const posts = await publishedPosts();
+  return postYears(posts).map(({ year, count }) => ({ params: { year: String(year) }, props: { year, count, months: yearPosts(posts, year) } }));
+}) satisfies GetStaticPaths;
+
+const { year, count, months } = Astro.props;
+const blog = site.blog!;
+const path = yearPath(year);
+const description = `${count} ${count === 1 ? "post" : "posts"} from ${site.name} in ${year}, newest first.`;
+const all = months.flatMap((m) => m.posts);
+---
+
+<BaseLayout
+  title={`${blog.title}: ${year} | ${site.name}`}
+  description={description}
+  path={path}
+  noindex={count < MIN_INDEXED}
+  schema={{
+    type: "CollectionPage",
+    crumbs: [{ name: blog.title, path: `/${blog.path}` }, { name: String(year), path }],
+    nodes: [itemList(site, path, all.map((p) => ({ name: p.data.title, path: postPath(p.id) })))],
+  }}
+>
+  <section class="bg-tint">
+    <div class="container py-12 lg:py-16">
+      <nav aria-label="Breadcrumb" class="mb-6 text-[0.92rem] text-ink-2"><a href="/" class="text-ink-2">Home</a> › <a href={`/${blog.path}`} class="text-ink-2">{blog.title}</a> › <span aria-current="page">{year}</span></nav>
+      <h1 class="h-page">{`${blog.title}: ${year}`}</h1>
+      <p class="lead mt-5 max-w-2xl">{description}</p>
+    </div>
+  </section>
+  <div class="container max-w-3xl py-14 lg:py-20">
+    {
+      months.map((m) => (
+        <section id={m.key} aria-labelledby={`h-${m.key}`} class="mt-12 first:mt-0">
+          <h2 id={`h-${m.key}`} class="text-2xl">{`${monthName(m.month, site.locale)} ${year}`}</h2>
+          <ul class="mt-4 divide-y divide-line border-y border-line">
+            {m.posts.map((p) => (
+              <li class="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4">
+                <a href={postPath(p.id)} class="font-medium text-ink no-underline after:absolute after:inset-0 hover:underline">{p.data.title}</a>
+                <time datetime={p.data.date.toISOString()} class="text-sm text-ink-3">{formatDate(p.data.date)}</time>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+    <p class="mt-12"><a href={`/${blog.path}`} class="font-semibold">All {blog.title.toLowerCase()}</a></p>
+  </div>
+</BaseLayout>

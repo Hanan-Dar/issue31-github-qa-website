@@ -1,0 +1,45 @@
+---
+// The Posts widget in a widget area: titles and dates, the newest first unless set (which posts:
+// Craeft's widgets, chosen for the whole area at once, as a page's are), and a link to the blog.
+// Beside a post, "Not the post you're on" leaves that one out.
+import type { CollectionEntry } from "astro:content";
+import type { z } from "astro/zod";
+import site from "virtual:site/config";
+import { postPath } from "../../lib/content";
+import { formatDate } from "../../lib/format";
+import type { PostSelection } from "../../lib/posts";
+import { editorMarkers, mark } from "../../lib/preview";
+import type { AreaPostsBlock } from "../schema";
+import EmptyBox from "../ui/EmptyBox.astro";
+import Widget from "../ui/Widget.astro";
+
+interface Props { data: z.infer<typeof AreaPostsBlock>; hid: string; selection?: PostSelection }
+const { data, hid, selection } = Astro.props;
+const posts = ((selection?.items ?? []) as CollectionEntry<"blog">[]).slice(0, selection?.visible ?? undefined);
+const TITLE = { s: "text-[0.97rem]", m: "text-base", l: "text-lg" } as const;
+const date = data.parts.includes("date");
+---
+
+{
+  (posts.length > 0 || data.emptyText || editorMarkers) && (
+    <Widget place="area" hid={hid} title={data.title}>
+      {posts.length > 0 ? (
+        <ul class="grid gap-3">
+          {posts.map((p) => (
+            <li {...mark({ post: p.id })} class="relative">
+              <a href={postPath(p.id)} class:list={["font-medium leading-snug no-underline after:absolute after:inset-0 hover:underline", TITLE[data.titleSize]]}>{p.data.title}</a>
+              {date && <time datetime={p.data.date.toISOString()} class="block text-sm text-ink-3 [.tone-dark_&]:text-white/70">{formatDate(p.data.date)}</time>}
+            </li>
+          ))}
+        </ul>
+      ) : data.emptyText ? (
+        <p class="text-ink-2 [.tone-dark_&]:text-white/80">{data.emptyText}</p>
+      ) : (
+        <EmptyBox what="No posts match these settings." reason={selection?.reason} />
+      )}
+      {posts.length > 0 && data.more !== "none" && site.blog && (
+        <a href={`/${site.blog.path}`} class="mt-4 inline-block text-sm font-semibold">{data.moreText ?? `All ${site.blog.title.toLowerCase()}`}</a>
+      )}
+    </Widget>
+  )
+}

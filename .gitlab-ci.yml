@@ -1,0 +1,62 @@
+# GitLab's version of .github/workflows (the site uses one or the other; the other is ignored).
+#   verify   every merge request and every push to main: type checks, the URL contract and the
+#            SEO checks. "Pipelines must succeed" on main makes it the required check.
+#   promote  after verify passes on main: fast-forwards prod-main, which Cloudflare Workers Builds
+#            deploys the site and its backend from. It never force-pushes (prod-main is live).
+#
+# promote pushes with a project access token in the PROMOTE_TOKEN variable (masked, protected;
+# role Developer or higher with write_repository; Craeft sets it when it creates the project).
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
+
+stages: [verify, promote]
+
+default:
+  image: node:22-bookworm
+
+verify:
+  stage: verify
+  cache:
+    key:
+      files: [pnpm-lock.yaml]
+    paths: [.pnpm-store]
+  before_script:
+    - corepack enable
+    - pnpm config set store-dir .pnpm-store
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm check
+    - pnpm verify:urls
+    - pnpm verify:seo
+
+promote:
+  stage: promote
+  needs: [verify]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"
+  resource_group: promote-prod-main
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - |
+      set -euo pipefail
+      if [ -z "${PROMOTE_TOKEN:-}" ]; then echo "PROMOTE_TOKEN is not set (see the top of .gitlab-ci.yml)"; exit 1; fi
+      remote="https://promote:${PROMOTE_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      target="$CI_COMMIT_SHA"
+      git fetch "$remote" "+refs/heads/${CI_DEFAULT_BRANCH}:refs/remotes/live/main"
+      if ! git fetch "$remote" "+refs/heads/prod-main:refs/remotes/live/prod-main" 2>/dev/null; then
+        git push "$remote" "$target:refs/heads/prod-main"
+        exit 0
+      fi
+      if ! git merge-base --is-ancestor "$target" live/main; then echo "$target is not on main. Refusing to deploy it."; exit 1; fi
+      if git merge-base --is-ancestor "$target" live/prod-main; then echo "prod-main already has $target. Nothing to do."; exit 0; fi
+      if ! git merge-base --is-ancestor live/prod-main "$target"; then
+        echo "prod-main has commits that are not on main, so it can't fast-forward. Refusing to force-push."
+        echo "Bring them into main once: git checkout main && git merge origin/prod-main && git push origin main"
+        git log --oneline "$target"..live/prod-main
+        exit 1
+      fi
+      git push "$remote" "$target:refs/heads/prod-main"

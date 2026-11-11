@@ -1,0 +1,77 @@
+---
+// Two pictures of the same view (Craeft's widgets, packages/widgets, plan/ux/widgets.md): with the
+// script (<craeft-compare>), one over the other with a handle to drag, or to move with the arrow keys
+// once focused; with no script, side by side. Until both pictures are chosen, previews say so and
+// visitors see nothing.
+import { compareOf } from "@craeft/widgets/compare";
+import type { z } from "astro/zod";
+import Icon from "../components/Icon.astro";
+import { editorMarkers } from "../lib/preview";
+import ScriptCompare from "./compare/ScriptCompare.astro";
+import type { BeforeAfterBlock } from "./schema";
+import Empty from "./ui/Empty.astro";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof BeforeAfterBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+const c = compareOf(data);
+const SHAPE = { standard: "aspect-[4/3]", wide: "aspect-video", square: "aspect-square", tall: "aspect-[3/4]" } as const;
+const width = data.width === "wide" ? "" : data.shape === "tall" ? "mx-auto max-w-xl" : "mx-auto max-w-4xl";
+const label = "absolute top-3 rounded-full bg-ink/80 px-3 py-1 text-sm font-semibold text-white";
+const pictures = [
+  { side: "before", picture: data.before, text: c.before, at: "left-3" },
+  { side: "after", picture: data.after, text: c.after, at: "right-3" },
+] as const;
+---
+
+{
+  data.before && data.after && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      <figure class:list={["mt-10", width]}>
+        <craeft-compare class="relative block" data-start={c.start} style={`--pos: ${c.start}%`}>
+          <div data-pair class="grid grid-cols-2 gap-3">
+            {pictures.map((x) => (
+              <div {...{ [`data-${x.side}`]: "" }} class="relative overflow-hidden rounded-[var(--radius-card)]">
+                <img src={x.picture?.src} alt={x.picture?.alt} loading="lazy" decoding="async" draggable="false" class:list={["block w-full object-cover", SHAPE[data.shape]]} />
+                {data.labels && <span aria-hidden="true" class:list={[label, x.at]}>{x.text}</span>}
+              </div>
+            ))}
+          </div>
+          <div
+            data-handle
+            hidden
+            role="slider"
+            tabindex="0"
+            aria-label={`${c.before} and ${c.after}: how much of each shows`}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow={c.start}
+            data-label-before={c.before.toLowerCase()}
+            data-label-after={c.after.toLowerCase()}
+            class="group absolute inset-y-0 left-[var(--pos,50%)] z-10 w-11 -translate-x-1/2 cursor-ew-resize items-center justify-center outline-none [craeft-compare[data-ready]_&]:flex"
+          >
+            <span class="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-white shadow-[0_0_0_1px_rgb(0_0_0/0.15)]" />
+            <span class="relative grid h-11 w-11 place-items-center rounded-full border border-ink/20 bg-white text-ink shadow-lg ring-primary ring-offset-2 group-focus-visible:ring-4">
+              <Icon name="ChevronsLeftRight" class="h-5 w-5" />
+            </span>
+          </div>
+        </craeft-compare>
+        {data.caption && <figcaption class="mt-4 text-center text-ink-2 [.tone-dark_&]:text-white/80">{data.caption}</figcaption>}
+      </figure>
+    </Section>
+  )
+}
+{
+  !(data.before && data.after) && editorMarkers && (
+    <Empty tone={data.tone} hid={hid} data={data} what="No pictures show." reason={c.reason}>
+      <div aria-hidden="true" class:list={["mt-6 grid grid-cols-2 gap-3", width]}>
+        <div class:list={["rounded-[var(--radius-card)] bg-ink/10 [.tone-dark_&]:bg-white/15", SHAPE[data.shape]]} />
+        <div class:list={["rounded-[var(--radius-card)] bg-ink/15 [.tone-dark_&]:bg-white/20", SHAPE[data.shape]]} />
+      </div>
+    </Empty>
+  )
+}
+{data.before && data.after && <ScriptCompare />}

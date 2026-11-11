@@ -1,0 +1,24 @@
+---
+// The contact form beside the ways to get in touch.
+import type { z } from "astro/zod";
+import ContactForm from "../components/ContactForm.astro";
+import Details from "../components/Details.astro";
+import type { ContactBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof ContactBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+---
+
+<Section tone={data.tone} labelledby={hid}>
+  <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+  {/* Phones: one column the screen's width, and less padding, so the spam check (300 px) fits a 375 px phone. */}
+  <div class="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.25fr_0.75fr]">
+    <div class="card p-4 sm:p-8 [.tone-dark_&]:bg-white [.tone-dark_&]:text-ink">
+      <ContactForm />
+    </div>
+    <Details />
+  </div>
+</Section>

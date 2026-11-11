@@ -1,0 +1,43 @@
+title: "About us"
+seo:
+  title: "About Issue31 GitHub QA | Plumbers in Leeds"
+  description: "Who we are, how we work and what we care about: Issue31 GitHub QA is a local plumbing and heating firm in Leeds."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: "About Issue31 GitHub QA"
+    lead: "A local plumbing and heating firm that people recommend to their friends."
+
+  - blockType: split
+    title: Our story
+    body: |
+      Tell your story here: how the business started, who runs it, and what you're proud of. People like to know who will be coming to their home.
+
+      Keep it short and true. A few sentences about your experience and the kind of work you enjoy is plenty.
+    highlight:
+      title: In short
+      items:
+        - Local and independent
+        - Fully insured
+        - Clear prices, no surprises
+
+  - blockType: features
+    tone: white
+    title: How we work
+    items:
+      - icon: MessageCircle
+        title: We explain things
+        text: You'll know what we're doing and why, before we do it.
+      - icon: Clock
+        title: We turn up on time
+        text: If something changes, we call you, not the other way round.
+      - icon: Sparkles
+        title: We leave it clean
+        text: Dust sheets down while we work, and everything tidied away after.
+
+  - blockType: cta
+    title: Talk to us about your job
+    text: We're happy to give advice, even if it's a small job.
+    buttons:
+      - label: Get in touch
+        href: /contact

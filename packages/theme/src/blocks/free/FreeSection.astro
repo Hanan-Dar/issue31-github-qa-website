@@ -1,0 +1,38 @@
+---
+// A free-form section (roadmap 16.1): columns of elements, laid out with the theme's own steps.
+import type { z } from "astro/zod";
+import type { SectionBlock } from "../schema";
+import { mark } from "../../lib/preview";
+import { contrast } from "../../site-config";
+import Element from "./Element.astro";
+import { columnsClass, GAP, hideClass, paddingClass, spanClass, VALIGN, WIDTH } from "./layout";
+
+interface Props { data: z.infer<typeof SectionBlock>; index: number }
+const { data, index } = Astro.props;
+const heading = data.cells.flatMap((c) => c.elements).find((e) => e.element === "heading");
+const hid = heading ? `block-${index}` : undefined;
+// A custom background (Advanced): its text is white or dark, whichever reads better (WCAG AA).
+const bg = data.advanced?.background;
+const tone = bg ? (contrast(bg, "#ffffff") >= 4.5 ? "dark" : "white") : data.tone;
+---
+
+<section
+  aria-labelledby={hid}
+  class:list={[`tone-${tone}`, paddingClass(data.padding), hideClass(data.hideOn)]}
+  style={bg ? `background-color: ${bg}` : undefined}
+  {...mark({ section: index })}
+>
+  <div class:list={["container", WIDTH[data.width]]} style={data.advanced?.maxWidth ? `max-width: ${data.advanced.maxWidth}px` : undefined}>
+    <div class:list={["grid", columnsClass(data.columns), GAP[data.gap], VALIGN[data.valign]]}>
+      {
+        data.cells.map((cell, ci) => (
+          <div class:list={["min-w-0 space-y-5", spanClass(cell.span, data.columns)]}>
+            {cell.elements.map((el, ei) => (
+              <Element data={el} headingId={el === heading ? hid : undefined} uid={`s${index}-${ci}-${ei}`} />
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

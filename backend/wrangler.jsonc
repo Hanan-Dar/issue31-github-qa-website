@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The contact form's backend. The site reaches it through its service binding only: no public
+  // address, no previews.
+  "name": "issue31-github-qa-www-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "workers_dev": false,
+  "preview_urls": false,
+  // Enquiries. 
+  "d1_databases": [{"binding":"DB","database_name":"issue31-github-qa-www-enquiries","database_id":"3d00d29c-60ca-45dc-ac7b-1b2341ae4ba6","migrations_dir":"migrations"}],
+  "vars": {
+    "SITE_NAME": "Issue31 GitHub QA",
+    "SITE_ID": "issue31-github-qa",
+    // Where enquiries are emailed: keep it the same as forms.inbox in sites/main/site.config.ts.
+    "FORM_INBOX": "hananfdar@gmail.com",
+    "GATEWAY_URL": "https://gateway.craeft.org"
+  }
+  // Secrets (wrangler secret put): TURNSTILE_SECRET_KEY, FORMS_KEY.
+}

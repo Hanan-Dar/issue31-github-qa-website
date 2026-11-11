@@ -1,0 +1,11 @@
+---
+// The logo (site.config.ts `logo`) and the business name, linking home.
+import site from "virtual:site/config";
+interface Props { dark?: boolean }
+const { dark } = Astro.props;
+---
+
+<a href="/" class:list={["inline-flex items-center gap-3 no-underline", dark ? "text-white" : "text-ink"]}>
+  <img src={site.logo} alt="" width="40" height="40" class="h-10 w-10 rounded-lg object-contain" />
+  <span class="font-heading text-lg leading-tight font-semibold sm:text-xl">{site.name}</span>
+</a>

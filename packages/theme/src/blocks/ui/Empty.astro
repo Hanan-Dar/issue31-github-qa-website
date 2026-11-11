@@ -1,0 +1,25 @@
+---
+// In previews only (Craeft's editor): a widget section with nothing to show, with its header and a
+// dashed box saying why and what to change. Visitors never see it (the section isn't drawn for them).
+import type { ToneName } from "../schema";
+import Section from "./Section.astro";
+import SectionHeader from "./SectionHeader.astro";
+
+interface Props {
+  tone: ToneName;
+  hid: string;
+  data: { eyebrow?: string; title?: string; lead?: string };
+  /** "No people show." */
+  what: string;
+  reason?: string;
+}
+const { tone, hid, data, what, reason } = Astro.props;
+---
+
+<Section tone={tone} labelledby={data.title ? hid : undefined}>
+  {data.title && <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />}
+  <div data-craeft-empty class="mt-6 rounded-[var(--radius-card)] border-2 border-dashed border-ink/25 p-6 text-ink-2 [.tone-dark_&]:border-white/40 [.tone-dark_&]:text-white/85">
+    <strong>{what}</strong> {reason ?? ""} Visitors don't see this box.
+  </div>
+  <slot />
+</Section>

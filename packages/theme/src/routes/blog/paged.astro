@@ -1,0 +1,31 @@
+---
+// The blog index's later pages: /<blog path>/page/2 … (page 1 is index.astro). Only when the site
+// sets `blog.perPage`, and none while the blog fits on one page.
+import type { GetStaticPaths } from "astro";
+import site from "virtual:site/config";
+import BlogList from "../../components/BlogList.astro";
+import { publishedPosts } from "../../lib/content";
+import { BLOG_PAGE_SIZE, blogPagePath, pageCount } from "../../lib/posts";
+
+export const getStaticPaths = (async () => {
+  const pages = pageCount((await publishedPosts()).length, BLOG_PAGE_SIZE);
+  return Array.from({ length: pages - 1 }, (_, i) => ({ params: { page: String(i + 2) } }));
+}) satisfies GetStaticPaths;
+
+const blog = site.blog!;
+const page = Number(Astro.params.page);
+const path = blogPagePath(page);
+const posts = await publishedPosts();
+---
+
+<BlogList
+  title={`${blog.title}, page ${page} | ${site.name}`}
+  description={blog.description}
+  heading={`${blog.title}: page ${page}`}
+  path={path}
+  crumbs={[{ name: blog.title, path: `/${blog.path}` }, { name: `Page ${page}`, path }]}
+  posts={posts}
+  page={page}
+  pagePath={blogPagePath}
+  perPage={BLOG_PAGE_SIZE}
+/>

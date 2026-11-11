@@ -1,0 +1,93 @@
+---
+// Draws a page's blocks in order. Every block is static HTML; only the contact form, the phone menu
+// and some widgets' settings (carousel, load more, filter buttons, entrance, a gallery's lightbox,
+// the logos' strip, the pricing switch, the before and after slider) run a little JavaScript.
+import { resolveLinks } from "../lib/content";
+import { expandSaved, type PostSelection, postSelections } from "../lib/posts";
+import { mark } from "../lib/preview";
+import Archive from "./Archive.astro";
+import Areas from "./Areas.astro";
+import BeforeAfter from "./BeforeAfter.astro";
+import BusinessDetails from "./BusinessDetails.astro";
+import ChildPages from "./ChildPages.astro";
+import Contact from "./Contact.astro";
+import Cta from "./Cta.astro";
+import Faq from "./Faq.astro";
+import FreeSection from "./free/FreeSection.astro";
+import Features from "./Features.astro";
+import Gallery from "./Gallery.astro";
+import Hero from "./Hero.astro";
+import Hours from "./Hours.astro";
+import Links from "./Links.astro";
+import Logos from "./Logos.astro";
+import Menu from "./Menu.astro";
+import Posts from "./Posts.astro";
+import Pricing from "./Pricing.astro";
+import Prose from "./Prose.astro";
+import type { PageBlock } from "./schema";
+import SocialLinks from "./SocialLinks.astro";
+import Split from "./Split.astro";
+import Steps from "./Steps.astro";
+import TagList from "./TagList.astro";
+import Team from "./Team.astro";
+import Testimonials from "./Testimonials.astro";
+
+interface Props {
+  blocks: PageBlock[];
+  /** The breadcrumb trail after Home, shown in a page hero. */
+  crumbs?: { name: string; path: string }[];
+  /** The first block's place on its page (Craeft's Design view draws one block at a time). */
+  offset?: number;
+  /** The page's address: shuffled sections start from it. */
+  path?: string;
+  /** The commit drawn (Craeft's Design view sends it): shuffled sections start from it too. */
+  commit?: string;
+  /**
+   * What each Posts section on the whole page shows, by its place on the page (lib/posts.ts), when
+   * `blocks` is part of a page (the Design view). Worked out here otherwise.
+   */
+  selections?: (PostSelection | undefined)[];
+}
+const { crumbs, offset = 0, path, commit } = Astro.props;
+const page = { path, commit };
+// Saved sections in their place: a missing one fails the build (a page never loses a section).
+const expanded = await expandSaved(Astro.props.blocks);
+const blocks = await resolveLinks(expanded);
+const selections = Astro.props.selections?.slice(offset) ?? (await postSelections(expanded, { path }));
+---
+
+{
+  blocks.map((data, i) => (
+    <div
+      id={"anchor" in data ? data.anchor : undefined}
+      data-reveal={data.blockType === "hero" ? undefined : ""}
+      {...mark({ block: offset + i, type: Astro.props.blocks[i]?.blockType ?? data.blockType })}
+    >
+      {data.blockType === "hero" && <Hero data={data} crumbs={crumbs} />}
+      {data.blockType === "features" && <Features data={data} index={i} />}
+      {data.blockType === "split" && <Split data={data} index={i} />}
+      {data.blockType === "steps" && <Steps data={data} index={i} />}
+      {data.blockType === "prose" && <Prose data={data} index={i} />}
+      {data.blockType === "faq" && <Faq data={data} index={i} page={page} />}
+      {data.blockType === "cta" && <Cta data={data} index={i} />}
+      {data.blockType === "links" && <Links data={data} index={i} />}
+      {data.blockType === "posts" && <Posts data={data} index={i} selection={selections[i]} />}
+      {data.blockType === "testimonials" && <Testimonials data={data} index={i} page={page} />}
+      {data.blockType === "gallery" && <Gallery data={data} index={i} page={page} />}
+      {data.blockType === "team" && <Team data={data} index={i} page={page} />}
+      {data.blockType === "logos" && <Logos data={data} index={i} page={page} />}
+      {data.blockType === "child-pages" && <ChildPages data={data} index={i} page={page} />}
+      {data.blockType === "pricing" && <Pricing data={data} index={i} />}
+      {data.blockType === "before-after" && <BeforeAfter data={data} index={i} />}
+      {data.blockType === "menu" && <Menu data={data} index={i} />}
+      {data.blockType === "hours" && <Hours data={data} index={i} />}
+      {data.blockType === "areas" && <Areas data={data} index={i} />}
+      {data.blockType === "contact" && <Contact data={data} index={i} />}
+      {data.blockType === "section" && <FreeSection data={data} index={i} />}
+      {data.blockType === "tag-list" && <TagList data={data} index={i} />}
+      {data.blockType === "archive" && <Archive data={data} index={i} />}
+      {data.blockType === "business-details" && <BusinessDetails data={data} index={i} />}
+      {data.blockType === "social-links" && <SocialLinks data={data} index={i} />}
+    </div>
+  ))
+}

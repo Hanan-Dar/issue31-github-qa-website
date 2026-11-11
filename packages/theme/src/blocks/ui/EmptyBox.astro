@@ -1,0 +1,10 @@
+---
+// In previews only (Craeft's editor): the dashed box a widget shows when it has nothing to show,
+// saying why and what to change. Visitors never see it.
+interface Props { what: string; reason?: string }
+const { what, reason } = Astro.props;
+---
+
+<div data-craeft-empty class="rounded-[var(--radius-card)] border-2 border-dashed border-ink/25 p-4 text-sm text-ink-2 [.tone-dark_&]:border-white/40 [.tone-dark_&]:text-white/85">
+  <strong>{what}</strong> {reason ?? ""} Visitors don't see this box.
+</div>

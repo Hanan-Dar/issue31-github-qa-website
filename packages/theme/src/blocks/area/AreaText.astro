@@ -1,0 +1,14 @@
+---
+// Text in a widget area: a small heading, if it has one, and its paragraphs and lists.
+import type { z } from "astro/zod";
+import { mdBlock } from "../../lib/md";
+import type { ProseBlock } from "../schema";
+import Widget from "../ui/Widget.astro";
+
+interface Props { data: z.infer<typeof ProseBlock>; hid: string }
+const { data, hid } = Astro.props;
+---
+
+<Widget place="area" hid={hid} title={data.title}>
+  <div class="prose-site text-[0.97rem]" set:html={mdBlock(data.body)} />
+</Widget>

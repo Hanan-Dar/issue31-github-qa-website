@@ -1,0 +1,98 @@
+---
+// A post as a card: its picture, date and summary by default (the blog's index, Latest posts). A
+// Posts section's settings (`look`) choose the card style, the picture's shape and place, and which
+// parts show in what order; the title always shows, after the leading date, author, tags or reading time.
+import type { CollectionEntry } from "astro:content";
+import { postMinutes } from "@craeft/widgets/posts";
+import type { CardLook } from "../blocks/posts/layout";
+import { postPath } from "../lib/content";
+import { mark } from "../lib/preview";
+import PostMeta from "./PostMeta.astro";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  heading?: "h2" | "h3";
+  look?: Partial<CardLook>;
+  /** The featured item of a "Featured" layout: a larger title. */
+  large?: boolean;
+}
+const { post, heading: H = "h3", look = {}, large = false } = Astro.props;
+const d = post.data;
+const parts = look.parts ?? ["date", "summary"];
+const position = look.picturePosition ?? "top";
+const behind = position === "behind";
+const showPicture = look.picture !== false && !!d.image;
+
+const META = new Set(["date", "author", "tags", "readingTime"]);
+// From the post's text when the site builds; from its word count in Craeft's render Worker.
+const minutes = postMinutes(post);
+// Runs of date, author, tags and reading time become one line each; the title follows the first run
+// when the parts start with one.
+type Run = { meta: true; parts: string[] } | { meta: false; part: string };
+const runs: Run[] = [];
+for (const p of parts) {
+  if (!META.has(p)) runs.push({ meta: false, part: p });
+  else if (p === "author" && !d.author) continue;
+  else if (p === "tags" && !d.tags?.length) continue;
+  else if (p === "readingTime" && !minutes) continue;
+  else {
+    const last = runs.at(-1);
+    if (last?.meta) last.parts.push(p);
+    else runs.push({ meta: true, parts: [p] });
+  }
+}
+const lead = parts[0] && META.has(parts[0]) && runs[0]?.meta ? runs.shift() : undefined;
+
+const SHAPE = { wide: "aspect-[16/9]", standard: "aspect-[4/3]", square: "aspect-square", tall: "aspect-[3/4]", natural: "" } as const;
+const HOVER = { none: "", zoom: "transition-transform duration-500 group-hover:scale-105", darken: "transition group-hover:brightness-75" } as const;
+const TITLE = { s: "text-lg", m: "text-xl", l: "text-2xl" } as const;
+const CLAMP = { one: "line-clamp-1", three: "line-clamp-3", all: "" } as const;
+const box = { plain: "", bordered: "card shadow-none", raised: "card" }[look.cardStyle ?? "raised"];
+const titleSize = large ? "text-2xl md:text-3xl" : TITLE[look.titleSize ?? "m"];
+const metaClass = behind ? "text-sm text-white/85" : "text-sm text-ink-3 [.tone-dark_&]:text-white/75";
+const linkClass = behind ? "text-white no-underline after:absolute after:inset-0 hover:underline" : "text-ink no-underline after:absolute after:inset-0 hover:underline [.tone-dark_&]:text-white";
+---
+
+<article
+  {...mark({ post: post.id })}
+  class:list={[
+    box,
+    "group relative flex h-full",
+    behind ? "isolate min-h-80 flex-col justify-end rounded-[var(--radius-card)] bg-dark" : position === "left" && showPicture ? "flex-col sm:flex-row" : "flex-col",
+    "overflow-hidden",
+  ]}
+>
+  {
+    showPicture && (
+      <img
+        src={d.image}
+        alt={d.imageAlt}
+        loading="lazy"
+        class:list={[
+          behind ? "absolute inset-0 -z-10 h-full" : SHAPE[look.pictureShape ?? "wide"],
+          position === "left" && !behind && "sm:w-2/5 sm:shrink-0 sm:self-stretch",
+          "w-full object-cover",
+          HOVER[look.pictureHover ?? "none"],
+        ]}
+      />
+    )
+  }
+  {behind && <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/40 to-black/5" aria-hidden="true" />}
+  <div class:list={["flex flex-1 flex-col", box || behind ? "p-6" : "pt-4", behind && "flex-none text-white"]}>
+    {lead?.meta && <PostMeta post={post} parts={lead.parts} minutes={minutes} class={metaClass} />}
+    <H class:list={[lead && "mt-2", titleSize, behind && "text-white"]}>
+      <a href={postPath(post.id)} class={linkClass}>{d.title}</a>
+    </H>
+    {
+      runs.map((r) =>
+        r.meta ? (
+          <PostMeta post={post} parts={r.parts} minutes={minutes} class={`mt-3 ${metaClass}`} />
+        ) : r.part === "summary" ? (
+          <p class:list={["mt-2", behind ? "text-white/85" : "text-ink-2 [.tone-dark_&]:text-white/80", CLAMP[look.summaryLength ?? "all"]]}>{d.description}</p>
+        ) : (
+          <span class:list={["mt-auto pt-4 font-semibold", behind ? "text-white" : "text-primary-ink [.tone-dark_&]:text-white"]} aria-hidden="true">{look.readMoreText ?? "Read more"} →</span>
+        )
+      )
+    }
+  </div>
+</article>

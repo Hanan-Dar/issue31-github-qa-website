@@ -1,0 +1,22 @@
+{
+  "name": "website",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "dev": "pnpm --filter @site/main dev",
+    "dev:backend": "pnpm --filter @site/backend dev",
+    "build": "pnpm --filter @site/main build",
+    "preview": "pnpm --filter @site/main preview",
+    "check": "pnpm --filter @site/main check && pnpm --filter @site/backend check",
+    "contract": "node tools/build-contract.mjs",
+    "verify:urls": "node tools/verify-urls.mjs",
+    "verify:seo": "node tools/verify-seo.mjs",
+    "verify": "pnpm check && pnpm verify:schema && pnpm verify:urls && pnpm verify:seo",
+    "schema": "node tools/build-block-schema.mjs",
+    "verify:schema": "node tools/build-block-schema.mjs --check"
+  },
+  "devDependencies": {
+    "cheerio": "^1.2.0"
+  }
+}

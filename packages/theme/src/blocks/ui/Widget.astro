@@ -1,0 +1,38 @@
+---
+// A widget's frame: on a page, a section with its header (as every block has); in a widget area (the
+// footer's columns, a post's sidebar), a column with a small heading.
+import { mdInline } from "../../lib/md";
+import type { ToneName } from "../schema";
+import Section from "./Section.astro";
+import SectionHeader from "./SectionHeader.astro";
+
+interface Props {
+  place?: "page" | "area";
+  tone?: ToneName;
+  /** The heading's id. */
+  hid: string;
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+}
+const { place = "page", tone, hid, eyebrow, title, lead } = Astro.props;
+---
+
+{
+  place === "area" ? (
+    <section aria-labelledby={title ? hid : undefined} class="min-w-0">
+      {title && <h2 id={hid} class="font-sans text-sm font-semibold tracking-[0.12em] text-ink-3 uppercase [.tone-dark_&]:text-white/75">{title}</h2>}
+      {lead && <p class="mt-2 text-sm text-ink-2 [.tone-dark_&]:text-white/80" set:html={mdInline(lead)} />}
+      <div class:list={[(title || lead) && "mt-4"]}>
+        <slot />
+      </div>
+    </section>
+  ) : (
+    <Section tone={tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={eyebrow} title={title ?? ""} lead={lead} />
+      <div class="mt-8">
+        <slot />
+      </div>
+    </Section>
+  )
+}

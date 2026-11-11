@@ -1,0 +1,21 @@
+---
+// The home page: src/content/pages/index.yaml.
+import { getEntry } from "astro:content";
+import BlockRenderer from "../blocks/BlockRenderer.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { faqFromBlocks } from "../lib/page-schema";
+
+const page = await getEntry("pages", "index");
+if (!page) throw new Error("Missing src/content/pages/index.yaml");
+const faq = await faqFromBlocks(page.data.blocks, { path: "/" });
+---
+
+<BaseLayout
+  title={page.data.seo.title}
+  description={page.data.seo.description}
+  path="/"
+  image={page.data.seo.image}
+  schema={{ crumbs: false, faq, dateModified: page.data.updatedAt }}
+>
+  <BlockRenderer blocks={page.data.blocks} path="/" />
+</BaseLayout>

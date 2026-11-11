@@ -1,0 +1,18 @@
+{
+  "name": "Issue31 GitHub QA",
+  "description": "A test plumber in Leeds, made to check new sites on GitHub.",
+  "businessType": "HomeAndConstructionBusiness",
+  "contact": {
+    "email": "hananfdar@gmail.com"
+  },
+  "address": {
+    "locality": "Leeds",
+    "country": "GB"
+  },
+  "areasServed": [
+    "Leeds"
+  ],
+  "openingHours": [],
+  "logo": "/media/logo.svg",
+  "social": []
+}

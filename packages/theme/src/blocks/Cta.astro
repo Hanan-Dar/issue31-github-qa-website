@@ -1,0 +1,23 @@
+---
+// A closing call to action on a dark band.
+import type { z } from "astro/zod";
+import type { CtaBlock } from "./schema";
+import Btn from "./ui/Btn.astro";
+
+interface Props { data: z.infer<typeof CtaBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+---
+
+<section class="tone-plain py-16 lg:py-20" aria-labelledby={hid}>
+  <div class="container">
+    <div class="tone-dark relative overflow-hidden rounded-[1.75rem] px-6 py-12 text-center sm:px-12 lg:py-16">
+      <div aria-hidden="true" class="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--brand-accent)_40%,transparent),transparent)]"></div>
+      <h2 id={hid} class="h-section relative mx-auto max-w-2xl">{data.title}</h2>
+      <p class="lead relative mx-auto mt-4 max-w-xl">{data.text}</p>
+      <div class="relative mt-8 flex flex-wrap justify-center gap-3">
+        {data.buttons.map((b, i) => <Btn button={b} fallback={i === 0 ? "primary" : "secondary"} />)}
+      </div>
+    </div>
+  </div>
+</section>

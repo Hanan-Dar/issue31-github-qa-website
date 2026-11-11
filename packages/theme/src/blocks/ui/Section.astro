@@ -1,0 +1,10 @@
+---
+// A page section: its background (the block's tone) and vertical spacing. Every block sits in one.
+import type { ToneName } from "../schema";
+interface Props { tone?: ToneName; labelledby?: string; class?: string; id?: string }
+const { tone = "plain", labelledby, class: cls, id } = Astro.props;
+---
+
+<section id={id} aria-labelledby={labelledby} class:list={[`tone-${tone}`, "section-y", cls]}>
+  <div class="container"><slot /></div>
+</section>

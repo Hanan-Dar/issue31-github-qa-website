@@ -1,0 +1,92 @@
+---
+// Logos of clients, partners or accreditations: typed in the section, or the site's logos
+// (src/content/logos/) chosen by Craeft's widgets (packages/widgets, plan/ux/widgets.md). In a row,
+// a grid or a slowly scrolling strip (<craeft-marquee>: still with no script, for people who ask
+// for less motion and in Craeft's editor; a pause button otherwise). Each logo has its description.
+import { getCollection } from "astro:content";
+import { type Logo, selectLogos } from "@craeft/widgets/logos";
+import type { z } from "astro/zod";
+import Icon from "../components/Icon.astro";
+import { editorMarkers } from "../lib/preview";
+import { pageSeed } from "../lib/posts";
+import ScriptMarquee from "./logos/ScriptMarquee.astro";
+import { columnsClass, GAP } from "./posts/layout";
+import type { LogosBlock } from "./schema";
+import Empty from "./ui/Empty.astro";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof LogosBlock>; index: number; page?: { path?: string; commit?: string } }
+const { data, index, page } = Astro.props;
+const hid = `block-${index}`;
+const collection = data.show === "collection" ? await getCollection("logos") : [];
+const sel = selectLogos<Logo>(data, collection, { seed: pageSeed(page) });
+const logos = sel.items;
+const layout = data.layout;
+const strip = layout === "strip";
+const SIZE = { s: "h-8 max-w-[7rem]", m: "h-11 max-w-[9rem]", l: "h-16 max-w-[12rem]" } as const;
+const img = [
+  "w-auto object-contain",
+  SIZE[data.logoSize],
+  data.grey && "opacity-70 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-focus-visible:opacity-100 group-focus-visible:grayscale-0",
+];
+const box = data.boxed ? "card grid place-items-center px-6 py-5 [.tone-dark_&]:bg-white" : "grid place-items-center";
+const top = data.title ? "mt-10" : "";
+// A strip takes about 3 seconds a logo to go round (4.5 slower), so it reads as calm however many there are.
+const seconds = Math.max(20, Math.round(logos.length * (data.stripSpeed === "slower" ? 4.5 : 3)));
+---
+
+{
+  logos.length > 0 && (
+    <Section tone={data.tone} labelledby={data.title ? hid : undefined}>
+      {data.title && <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} center={layout !== "grid"} />}
+      {strip ? (
+        <craeft-marquee class:list={["block", top]} data-still={editorMarkers ? "" : undefined} style={`--strip-time: ${seconds}s`}>
+          <div data-viewport class="overflow-x-auto [scrollbar-width:thin]">
+            <ul data-strip class="flex w-max items-center" aria-label={data.title ? undefined : "Logos"}>
+              {logos.map((g) => (
+                <li class="shrink-0 px-6 sm:px-9">
+                  <Fragment>{g.link ? <a href={g.link} class:list={["group", box]}><img src={g.src} alt={g.alt} loading="lazy" decoding="async" class:list={img} /></a> : <span class:list={["group", box]}><img src={g.src} alt={g.alt} loading="lazy" decoding="async" class:list={img} /></span>}</Fragment>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="mt-5 flex justify-center">
+            <button type="button" data-pause hidden data-play="Play" data-pause-text="Pause" class="btn btn-sm btn-secondary">
+              <span data-icon-pause><Icon name="Pause" class="h-4 w-4" /></span><span data-icon-play><Icon name="Play" class="h-4 w-4" /></span>
+              <span data-pause-label>Pause</span>
+            </button>
+          </div>
+        </craeft-marquee>
+      ) : (
+        <ul
+          class:list={[
+            top,
+            layout === "grid" ? ["grid items-center", GAP[data.gap], columnsClass(data.columns ?? { desktop: 5, tablet: 4, phone: 2 })] : "flex flex-wrap items-center justify-center gap-x-10 gap-y-8 sm:gap-x-14",
+          ]}
+          aria-label={data.title ? undefined : "Logos"}
+        >
+          {logos.map((g) => (
+            <li class:list={[layout === "grid" && "grid"]}>
+              {g.link ? (
+                <a href={g.link} class:list={["group", box]}><img src={g.src} alt={g.alt} loading="lazy" decoding="async" class:list={img} /></a>
+              ) : (
+                <span class:list={["group", box]}><img src={g.src} alt={g.alt} loading="lazy" decoding="async" class:list={img} /></span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  )
+}
+{
+  logos.length === 0 && editorMarkers && (
+    <Empty tone={data.tone} hid={hid} data={data} what="No logos show." reason={sel.reason}>
+      <ul aria-hidden="true" class="mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+        {Array.from({ length: 5 }, () => <li class:list={["w-32 rounded-md bg-ink/10 [.tone-dark_&]:bg-white/15", SIZE[data.logoSize]]} />)}
+      </ul>
+    </Empty>
+  )
+}
+{strip && logos.length > 0 && <ScriptMarquee />}

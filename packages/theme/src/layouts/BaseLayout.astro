@@ -1,0 +1,90 @@
+---
+// The page shell: the <head> for search engines and social sharing (title, description,
+// canonical, Open Graph, JSON-LD), the header and the footer.
+import "virtual:site/theme.css";
+import "../styles/global.css";
+import site from "virtual:site/config";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import ScriptAll from "../blocks/posts/ScriptAll.astro";
+import Motion from "../components/Motion.astro";
+import CallBar from "../components/CallBar.astro";
+import { editorMarkers } from "../lib/preview";
+import { breadcrumbList, type Crumb, graph, jsonLdScript, type Node, organization, type PageNodeOpts, pageNode, website } from "../seo/jsonld";
+
+interface Props {
+  title: string;
+  description: string;
+  /** This page's path, e.g. "/about". The canonical address is the site's origin + path. */
+  path: string;
+  noindex?: boolean;
+  /** Social share image (path or URL); defaults to the site's share image. */
+  image?: string;
+  ogType?: "website" | "article";
+  schema?: {
+    type?: PageNodeOpts["type"];
+    /** The trail after Home; `false` for none. */
+    crumbs?: Crumb[] | false;
+    faq?: PageNodeOpts["faq"];
+    dateModified?: Date;
+    /** More nodes (BlogPosting, ItemList…). */
+    nodes?: Node[];
+  };
+}
+
+const { title, description, path, noindex = false, image, ogType = "website", schema = {} } = Astro.props;
+const canonical = site.origin + path;
+const share = image ?? site.shareImage;
+const shareUrl = share ? new URL(share, site.origin).href : undefined;
+const crumbs = schema.crumbs ?? false;
+const jsonLd = graph([
+  organization(site),
+  website(site),
+  pageNode(site, {
+    path,
+    title,
+    description,
+    type: schema.type,
+    image,
+    dateModified: schema.dateModified,
+    hasBreadcrumb: Boolean(crumbs),
+    faq: schema.faq,
+  }),
+  ...(crumbs ? [breadcrumbList(site, path, crumbs)] : []),
+  ...(schema.nodes ?? []),
+]);
+const ogLocale = site.locale.replace("-", "_");
+---
+
+<!doctype html>
+<html lang={site.locale} data-design={site.look?.design ?? "friendly"} data-motion={site.look?.motion ?? "calm"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? "noindex, follow" : "index, follow, max-image-preview:large"} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {shareUrl && <meta property="og:image" content={shareUrl} />}
+    <meta name="twitter:card" content={shareUrl ? "summary_large_image" : "summary"} />
+    <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+    {site.blog && <link rel="alternate" type="application/rss+xml" title={`${site.name}: ${site.blog.title}`} href="/rss.xml" />}
+    <script type="application/ld+json" set:html={jsonLdScript(jsonLd)} />
+  </head>
+  <body>
+    <a href="#main" class="sr-only z-[200] rounded-full bg-ink px-4 py-2 text-white focus:not-sr-only focus:fixed focus:top-4 focus:left-4">Skip to content</a>
+    <Header pathname={path} />
+    <main id="main"><slot /></main>
+    <Footer />
+    <CallBar />
+    {/* Previews (Craeft's editor): every widget element, so a section the editor swaps in works at once. */}
+    {editorMarkers && <ScriptAll />}
+    <Motion />
+  </body>
+</html>

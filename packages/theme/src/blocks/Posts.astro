@@ -1,0 +1,93 @@
+---
+// Blog posts chosen by the section's settings. Which posts, in what order: Craeft's widgets
+// (packages/widgets, plan/ux/widgets.md), worked out for the whole page by BlockRenderer
+// (`selection`); how they look: here and in posts/. Left as they are, the settings draw the newest
+// three as cards with a link to the blog. Shows nothing when nothing matches, unless the section
+// has a line for that; in previews (Craeft's editor) a dashed box says why.
+import type { CollectionEntry } from "astro:content";
+import { tagsOf } from "@craeft/widgets/posts";
+import type { z } from "astro/zod";
+import site from "virtual:site/config";
+import type { PostSelection } from "../lib/posts";
+import { editorMarkers } from "../lib/preview";
+import Carousel from "./posts/Carousel.astro";
+import Featured from "./posts/Featured.astro";
+import Items from "./posts/Items.astro";
+import ScriptEntrance from "./posts/ScriptEntrance.astro";
+import ScriptFilter from "./posts/ScriptFilter.astro";
+import ScriptMore from "./posts/ScriptMore.astro";
+import type { PostsBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof PostsBlock>; index: number; selection?: PostSelection }
+const { data, index, selection } = Astro.props;
+const posts = (selection?.items ?? []) as CollectionEntry<"blog">[];
+const hid = `block-${index}`;
+const layout = data.layout;
+const carousel = layout === "carousel";
+const loadMore = data.more === "loadMore" && !carousel && posts.length > (selection?.visible ?? posts.length);
+const visible = loadMore ? (selection?.visible ?? posts.length) : posts.length;
+const filterTags = data.filter && (layout === "grid" || layout === "tiles") ? tagsOf(posts) : [];
+const filter = filterTags.length > 1;
+const entrance = data.entrance !== "none" && !carousel;
+const blogLink = `/${site.blog?.path}`;
+const linkText = data.moreText ?? `All ${site.blog?.title.toLowerCase()}`;
+// The wrappers each feature needs, and none otherwise (so a plain grid is just its list).
+const More = loadMore ? "craeft-more" : Fragment;
+const Filter = filter ? "craeft-filter" : Fragment;
+const Enter = entrance ? "craeft-entrance" : Fragment;
+const wrap = (on: boolean, attrs: Record<string, unknown>) => (on ? { class: "block", ...attrs } : {});
+---
+
+{
+  posts.length > 0 && (
+    <Section tone={data.tone} labelledby={hid}>
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+        {(data.more === "link" || (carousel && data.more === "loadMore")) && <a href={blogLink} class="font-semibold">{linkText}</a>}
+      </div>
+      {carousel ? (
+        <Carousel data={data} posts={posts} label={data.title} />
+      ) : (
+        <Enter {...wrap(entrance, { "data-still": editorMarkers ? "" : undefined })}>
+          <Filter {...wrap(filter, {})}>
+            {filter && (
+              <div data-filter hidden role="group" aria-label="Show posts tagged" class="mt-8 flex flex-wrap gap-2">
+                <button type="button" data-tag="" aria-pressed="true" class="btn btn-sm btn-secondary aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white">All</button>
+                {filterTags.map((t) => (
+                  <button type="button" data-tag={t.slug} aria-pressed="false" class="btn btn-sm btn-secondary aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white">{t.name}</button>
+                ))}
+              </div>
+            )}
+            <More {...wrap(loadMore, { "data-step": data.count })}>
+              {layout === "featured" ? <Featured data={data} posts={posts} visible={visible} /> : <Items data={data} posts={posts} layout={layout} visible={visible} />}
+              {loadMore && (
+                <div class="mt-8 text-center">
+                  <button type="button" data-more hidden class="btn btn-secondary">{data.moreText ?? "Show more"}</button>
+                  <a data-more-fallback href={blogLink} class="font-semibold">{`All ${site.blog?.title.toLowerCase()}`}</a>
+                </div>
+              )}
+            </More>
+          </Filter>
+        </Enter>
+      )}
+    </Section>
+  )
+}
+{
+  posts.length === 0 && (data.emptyText || editorMarkers) && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      {data.emptyText && <p class="mt-6 text-ink-2 [.tone-dark_&]:text-white/80">{data.emptyText}</p>}
+      {editorMarkers && (
+        <div data-craeft-empty class="mt-6 rounded-[var(--radius-card)] border-2 border-dashed border-ink/25 p-6 text-ink-2 [.tone-dark_&]:border-white/40 [.tone-dark_&]:text-white/85">
+          <strong>No posts match these settings.</strong> {selection?.reason ?? ""} Visitors don't see this box.
+        </div>
+      )}
+    </Section>
+  )
+}
+{loadMore && <ScriptMore />}
+{filter && <ScriptFilter />}
+{entrance && <ScriptEntrance />}

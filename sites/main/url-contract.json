@@ -1,0 +1,92 @@
+[
+  {
+    "path": "/",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/about",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/areas",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/contact",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/contact-us",
+    "expect": 301,
+    "to": "/contact",
+    "why": "redirects.ts"
+  },
+  {
+    "path": "/home",
+    "expect": 301,
+    "to": "/",
+    "why": "redirects.ts"
+  },
+  {
+    "path": "/index",
+    "expect": 301,
+    "to": "/",
+    "why": "redirects.ts"
+  },
+  {
+    "path": "/llms.txt",
+    "expect": 200,
+    "kind": "file",
+    "why": "generated file"
+  },
+  {
+    "path": "/reviews",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/robots.txt",
+    "expect": 200,
+    "kind": "file",
+    "why": "generated file"
+  },
+  {
+    "path": "/services",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/services/bathroom-installation",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/services/boiler-repairs",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/services/emergency-plumbing",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/sitemap.xml",
+    "expect": 200,
+    "kind": "file",
+    "why": "generated file"
+  }
+]

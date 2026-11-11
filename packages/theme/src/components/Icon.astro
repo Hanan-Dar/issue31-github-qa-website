@@ -1,0 +1,15 @@
+---
+// A Lucide icon by name (https://lucide.dev/icons, e.g. "Wrench"), drawn at build time: no
+// JavaScript reaches the browser. An unknown name shows a plain circle rather than failing. In
+// previews it carries its name, so Craeft's Design view can open its field on a double-click.
+import { icons } from "lucide";
+import { mark } from "../lib/preview";
+
+interface Props { name: string; class?: string; strokeWidth?: number }
+const { name, class: cls = "h-6 w-6", strokeWidth = 2 } = Astro.props;
+const node = (icons as Record<string, [string, Record<string, string | number>][]>)[name] ?? icons.Circle;
+---
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={strokeWidth} stroke-linecap="round" stroke-linejoin="round" class={cls} aria-hidden="true" focusable="false" {...mark({ icon: name })}>
+  {node.map(([Tag, attrs]) => <Tag {...attrs} />)}
+</svg>

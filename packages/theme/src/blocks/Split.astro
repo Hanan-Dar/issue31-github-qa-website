@@ -1,0 +1,55 @@
+---
+// Text beside an image or a highlight box.
+import type { z } from "astro/zod";
+import Icon from "../components/Icon.astro";
+import { mdBlock } from "../lib/md";
+import type { SplitBlock } from "./schema";
+import Btn from "./ui/Btn.astro";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof SplitBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+const side = Boolean(data.image || data.highlight);
+---
+
+<Section tone={data.tone} labelledby={hid}>
+  <div class:list={["grid items-center gap-12", side && "lg:grid-cols-2"]}>
+    <div class:list={[data.reverse && "lg:order-2"]}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      <div class="prose-site mt-6" set:html={mdBlock(data.body)} />
+      {
+        data.bullets.length > 0 && (
+          <ul class="mt-6 grid gap-3">
+            {data.bullets.map((b) => (
+              <li class="flex items-start gap-3">
+                <Icon name="Check" class="mt-1 h-5 w-5 shrink-0 text-primary-ink [.tone-dark_&]:text-white" strokeWidth={2.5} />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {data.button && <div class="mt-8"><Btn button={data.button} /></div>}
+    </div>
+    {data.image && <img src={data.image.src} alt={data.image.alt} loading="lazy" sizes="(min-width: 1024px) 50vw, 100vw" class="aspect-[4/3] w-full rounded-[var(--radius-card)] object-cover" />}
+    {
+      !data.image && data.highlight && (
+        <div class="card p-7 sm:p-9">
+          <p class="font-heading text-2xl text-ink [.tone-dark_&]:text-white">{data.highlight.title}</p>
+          <ul class="mt-5 grid gap-3.5">
+            {data.highlight.items.map((h) => (
+              <li class="flex items-start gap-3">
+                <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-on-primary">
+                  <Icon name="Check" class="h-3.5 w-3.5" strokeWidth={3} />
+                </span>
+                <span>{h}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+</Section>

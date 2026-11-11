@@ -1,0 +1,114 @@
+---
+// Plans and prices side by side (Craeft's widgets, packages/widgets, plan/ux/widgets.md): on phones
+// they scroll sideways (or stack). With the monthly or yearly switch, <craeft-toggle> shows one price
+// or the other; with no script each plan shows its monthly price with the yearly one under it.
+import { selectPlans } from "@craeft/widgets/pricing";
+import type { z } from "astro/zod";
+import Icon from "../components/Icon.astro";
+import { mdInline } from "../lib/md";
+import ScriptToggle from "./pricing/ScriptToggle.astro";
+import type { PricingBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof PricingBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+const sel = selectPlans(data);
+const plans = sel.plans;
+const n = plans.length;
+const center = data.align === "center";
+const COLS = ["", "mx-auto max-w-md", "md:grid-cols-2 max-w-4xl mx-auto", "md:grid-cols-2 lg:grid-cols-3", "md:grid-cols-2 lg:grid-cols-4", "md:grid-cols-2 lg:grid-cols-3", "md:grid-cols-2 lg:grid-cols-3"];
+const swipe = data.phones === "carousel" && n > 1;
+const Box = sel.toggle ? "craeft-toggle" : Fragment;
+const monthly = data.monthlyLabel?.trim() || "Monthly";
+const yearly = data.yearlyLabel?.trim() || "Yearly";
+const pill = "rounded-full px-5 py-2 text-[0.95rem] font-semibold text-ink-2 transition-colors aria-pressed:bg-ink aria-pressed:text-white [.tone-dark_&]:text-white/85 [.tone-dark_&]:aria-pressed:bg-white [.tone-dark_&]:aria-pressed:text-ink";
+---
+
+{
+  n > 0 && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} center={center} />
+      <Box {...(sel.toggle ? { class: "block" } : {})}>
+        {sel.toggle && (
+          <div data-toggle hidden class:list={["mt-8 flex", center && "justify-center"]}>
+            <div role="group" aria-label="Prices shown" class="inline-flex flex-wrap items-center gap-1 rounded-full border border-line bg-white p-1 [.tone-dark_&]:border-white/25 [.tone-dark_&]:bg-white/10">
+              <button type="button" data-period="monthly" aria-pressed="true" class={pill}>{monthly}</button>
+              <button type="button" data-period="yearly" aria-pressed="false" class={pill}>
+                {yearly}
+                {data.yearlyNote && <span class="ml-1.5 rounded-full bg-accent px-2 py-0.5 text-xs text-on-accent">{data.yearlyNote}</span>}
+              </button>
+            </div>
+            <p data-toggle-status aria-live="polite" class="sr-only" />
+          </div>
+        )}
+        <ul
+          class:list={[
+            "mt-10 grid gap-5 pt-3",
+            swipe ? ["max-md:flex max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:pb-4"] : "",
+            COLS[n],
+          ]}
+          {...(swipe ? { tabindex: "0", "aria-label": `${data.title}: ${n} plans` } : {})}
+        >
+          {plans.map((p, i) => (
+            <li
+              class:list={[
+                "relative flex flex-col p-7",
+                data.cardStyle === "raised" ? "card" : "card shadow-none",
+                i === sel.popular && "border-primary ring-1 ring-primary [.tone-dark_&]:border-white [.tone-dark_&]:ring-white",
+                swipe && "max-md:w-[84%] max-md:shrink-0 max-md:snap-start",
+                center && "text-center",
+              ]}
+            >
+              {i === sel.popular && (
+                <span class:list={["absolute -top-3 rounded-full bg-primary px-3 py-1 text-xs font-semibold tracking-wide text-on-primary uppercase [.tone-dark_&]:bg-white [.tone-dark_&]:text-ink", center ? "left-1/2 -translate-x-1/2" : "left-6"]}>
+                  Most popular
+                </span>
+              )}
+              <h3 class="text-xl">{p.name}</h3>
+              {p.description && <p class="mt-1.5 text-ink-2 [.tone-dark_&]:text-white/80">{p.description}</p>}
+              {sel.toggle && p.yearlyPrice ? (
+                <Fragment>
+                  <p data-price="monthly" class:list={["mt-5 flex flex-wrap items-baseline gap-x-1.5", center && "justify-center"]}>
+                    <span class="font-heading text-4xl font-semibold text-ink [.tone-dark_&]:text-white">{p.price}</span>
+                    {p.period && <span class="text-ink-3 [.tone-dark_&]:text-white/75">{p.period}</span>}
+                  </p>
+                  <p data-price="yearly" class:list={["mt-5 flex-wrap items-baseline gap-x-1.5", center && "justify-center"]}>
+                    <span class="font-heading text-4xl font-semibold text-ink [.tone-dark_&]:text-white">{p.yearlyPrice}</span>
+                    <span class="text-ink-3 [.tone-dark_&]:text-white/75">{p.yearlyPeriod || "a year"}</span>
+                  </p>
+                  <p data-price="both" class="mt-1 text-sm text-ink-3 [.tone-dark_&]:text-white/75">
+                    or {p.yearlyPrice} {p.yearlyPeriod || "a year"}
+                  </p>
+                </Fragment>
+              ) : (
+                <p class:list={["mt-5 flex flex-wrap items-baseline gap-x-1.5", center && "justify-center"]}>
+                  <span class="font-heading text-4xl font-semibold text-ink [.tone-dark_&]:text-white">{p.price}</span>
+                  {p.period && <span class="text-ink-3 [.tone-dark_&]:text-white/75">{p.period}</span>}
+                </p>
+              )}
+              {(p.points ?? []).length > 0 && (
+                <ul class:list={["mt-6 flex-1 space-y-3 text-ink-2 [.tone-dark_&]:text-white/85", center && "mx-auto text-left"]}>
+                  {(p.points ?? []).map((pt) => (
+                    <li class="flex gap-2.5">
+                      <Icon name="Check" class="mt-0.5 h-5 w-5 shrink-0 text-primary-ink [.tone-dark_&]:text-white" />
+                      <span set:html={mdInline(pt)} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {p.button && (
+                <a href={p.button.href} class:list={["btn mt-8 w-full", (p.button.style ?? (i === sel.popular ? "primary" : "secondary")) === "primary" ? "btn-primary" : "btn-secondary"]}>
+                  {p.button.label}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+        {data.note && <p class:list={["mt-6 text-sm text-ink-3 [.tone-dark_&]:text-white/75", center && "text-center"]} set:html={mdInline(data.note)} />}
+      </Box>
+    </Section>
+  )
+}
+{sel.toggle && <ScriptToggle />}

@@ -1,0 +1,59 @@
+---
+// The blog's tags as a cloud (more posts, larger) or a list, each linking to its tag page; which and in
+// what order: Craeft's widgets (packages/widgets/src/tag-list.ts). On a page, a section; in a widget
+// area, a column. Shows nothing with no tags, except a dashed box in previews.
+import { selectTags } from "@craeft/widgets/tag-list";
+import type { z } from "astro/zod";
+import { publishedPosts } from "../lib/content";
+import { tagPath } from "../lib/posts";
+import { editorMarkers } from "../lib/preview";
+import type { TagListBlock } from "./schema";
+import EmptyBox from "./ui/EmptyBox.astro";
+import Widget from "./ui/Widget.astro";
+
+interface Props { data: z.infer<typeof TagListBlock>; index: number; place?: "page" | "area"; hid?: string }
+const { data, index, place = "page", hid = `block-${index}` } = Astro.props;
+const sel = selectTags(await publishedPosts(), data);
+const SIZE = { 1: "text-sm", 2: "text-base", 3: "text-lg", 4: "text-xl", 5: "text-2xl" } as const;
+const small = place === "area";
+---
+
+{
+  (sel.items.length > 0 || editorMarkers) && (
+    <Widget place={place} tone={data.tone} hid={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead}>
+      {sel.items.length === 0 ? (
+        <EmptyBox what="No tags show." reason={sel.reason} />
+      ) : data.style === "cloud" ? (
+        <ul class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          {sel.items.map((t) => (
+            <li>
+              <a href={tagPath(t.name)} class:list={[small ? SIZE[Math.min(t.size, 3) as 1 | 2 | 3] : SIZE[t.size], "font-medium"]}>
+                {t.name}
+                {data.counts && (
+                  <>
+                    <span aria-hidden="true" class="ml-1 text-sm font-normal text-ink-3 [.tone-dark_&]:text-white/70">{t.count}</span>
+                    <span class="sr-only">, {t.count === 1 ? "1 post" : `${t.count} posts`}</span>
+                  </>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul class:list={["grid gap-2", !small && "max-w-md"]}>
+          {sel.items.map((t) => (
+            <li class="flex items-baseline justify-between gap-4">
+              <a href={tagPath(t.name)}>{t.name}</a>
+              {data.counts && (
+                <span class="text-sm text-ink-3 tabular-nums [.tone-dark_&]:text-white/70">
+                  <span aria-hidden="true">{t.count}</span>
+                  <span class="sr-only">{t.count === 1 ? "1 post" : `${t.count} posts`}</span>
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  )
+}

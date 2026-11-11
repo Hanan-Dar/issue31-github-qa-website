@@ -1,0 +1,66 @@
+---
+// Cards for the pages under a page, or pages picked by hand (Craeft's widgets, packages/widgets,
+// plan/ux/widgets.md). Each card's title, text and picture come from its page (its title; its hero's
+// text, else its search description; its hero's picture), as the Links block's do, so they never go
+// stale; a page added under it joins by itself, and pages switched off in site.config.ts are left out.
+import { type PageCard, selectChildPages } from "@craeft/widgets/child-pages";
+import type { z } from "astro/zod";
+import { pagePath, publishedPages } from "../lib/content";
+import { mdText } from "../lib/md";
+import { editorMarkers } from "../lib/preview";
+import Card from "./child-pages/Card.astro";
+import { columnsClass, GAP } from "./posts/layout";
+import type { ChildPagesBlock } from "./schema";
+import UiCarousel from "./ui/Carousel.astro";
+import Empty from "./ui/Empty.astro";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof ChildPagesBlock>; index: number; page?: { path?: string; commit?: string } }
+const { data, index, page } = Astro.props;
+const hid = `block-${index}`;
+const cards: PageCard[] = (await publishedPages()).map((p) => {
+  const hero = p.data.blocks.find((b) => b.blockType === "hero");
+  const lead = hero?.blockType === "hero" ? mdText(hero.lead) : "";
+  const image = hero?.blockType === "hero" ? hero.image : undefined;
+  return { path: pagePath(p.id), title: p.data.title, text: lead || p.data.seo.description, ...(image ? { image } : {}) };
+});
+const sel = selectChildPages(data, cards, { here: page?.path ?? "/" });
+const pages = sel.items;
+const look = { cardStyle: data.cardStyle, pictures: data.pictures, text: data.text, linkText: data.linkText };
+const fill = data.pictures && pages.some((p) => p.image);
+---
+
+{
+  pages.length > 0 && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      {data.layout === "carousel" ? (
+        <UiCarousel data={data} dots={pages.map((p, i) => `Show ${i + 1}: ${p.title}`)} label={data.title}>
+          {pages.map((p, i) => (
+            <li class="carousel-item snap-start" aria-label={`${i + 1} of ${pages.length}`}>
+              <Card page={p} {...look} fill={fill} />
+            </li>
+          ))}
+        </UiCarousel>
+      ) : data.layout === "list" ? (
+        <ul class:list={["mt-10 grid", data.cardStyle === "plain" ? "divide-y divide-line [.tone-dark_&]:divide-white/15" : GAP[data.gap]]}>
+          {pages.map((p) => (
+            <li>
+              <Card page={p} {...look} row />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul class:list={["mt-10 grid", GAP[data.gap], columnsClass(data.columns), !data.equalHeights && "items-start"]}>
+          {pages.map((p) => (
+            <li>
+              <Card page={p} {...look} fill={fill} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  )
+}
+{pages.length === 0 && editorMarkers && <Empty tone={data.tone} hid={hid} data={data} what="No pages show." reason={sel.reason} />}

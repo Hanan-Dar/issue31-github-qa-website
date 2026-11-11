@@ -1,0 +1,13 @@
+packages:
+  - packages/*
+  - sites/*
+  - backend
+
+# Same layout as CI: a package may only use the dependencies it declares.
+nodeLinker: isolated
+
+# Packages allowed to run install scripts (Wrangler's runtime and the bundler).
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd

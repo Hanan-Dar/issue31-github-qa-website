@@ -1,0 +1,30 @@
+---
+// The dialog a gallery's pictures open in (<craeft-lightbox>, packages/widgets): closed until a
+// picture is pressed; the script puts the picture (or the video) in its stage.
+import ScriptLightbox from "./ScriptLightbox.astro";
+
+interface Props { label: string }
+const { label } = Astro.props;
+const icon = (d: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" aria-hidden="true" focusable="false"><path d="${d}"></path></svg>`;
+const button = "inline-grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+---
+
+<dialog data-lightbox aria-label={label} class="m-0 h-dvh max-h-none w-dvw max-w-none overflow-hidden bg-neutral-950 p-0 text-white backdrop:bg-black/80">
+  <div class="flex h-full flex-col">
+    <div class="flex items-center justify-between gap-4 px-4 py-3">
+      <p data-lightbox-count data-of="of" aria-live="polite" class="text-sm text-white/80"></p>
+      <button type="button" data-lightbox-close aria-label="Close" class={button} set:html={icon("M18 6 6 18M6 6l12 12")} />
+    </div>
+    <div class="relative flex min-h-0 flex-1 items-center justify-center gap-2 px-2 sm:gap-4 sm:px-4">
+      <button type="button" data-lightbox-prev aria-label="Previous picture" class={button} set:html={icon("m15 18-6-6 6-6")} />
+      <div
+        data-lightbox-stage
+        class="flex h-full min-w-0 flex-1 touch-pan-y items-center justify-center select-none [&>iframe]:aspect-video [&>iframe]:w-full [&>iframe]:max-w-5xl [&>img]:max-h-full [&>img]:max-w-full [&>img]:object-contain"
+      >
+      </div>
+      <button type="button" data-lightbox-next aria-label="Next picture" class={button} set:html={icon("m9 18 6-6-6-6")} />
+    </div>
+    <p data-lightbox-caption hidden class="mx-auto max-w-3xl px-4 pt-3 pb-5 text-center text-white/90"></p>
+  </div>
+</dialog>
+<ScriptLightbox />

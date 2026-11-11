@@ -1,0 +1,72 @@
+---
+// A page of the blog's posts: the index (/<blog path>, then /<blog>/page/2 …) and each tag's pages
+// (/<blog>/tag/<tag>, then /<blog>/tag/<tag>/2 …). `perPage` posts a page (none: all of them on one),
+// newest first, with links to the other pages when there's more than one.
+import type { CollectionEntry } from "astro:content";
+import site from "virtual:site/config";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { postPath } from "../lib/content";
+import { pageCount } from "../lib/posts";
+import { type Crumb, itemList } from "../seo/jsonld";
+import PostCard from "./PostCard.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  path: string;
+  crumbs: Crumb[];
+  /** Every post in the list (all pages). */
+  posts: CollectionEntry<"blog">[];
+  page: number;
+  /** Page n's address. */
+  pagePath: (n: number) => string;
+  /** Posts a page; none: every post on one page. */
+  perPage?: number;
+  noindex?: boolean;
+}
+const { title, description, heading, path, crumbs, posts: all, page, pagePath, noindex, perPage } = Astro.props;
+const pages = pageCount(all.length, perPage);
+const posts = perPage ? all.slice((page - 1) * perPage, page * perPage) : all;
+const trail = crumbs.slice(0, -1);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  noindex={noindex}
+  schema={{
+    type: "CollectionPage",
+    crumbs,
+    nodes: posts.length ? [itemList(site, path, posts.map((p) => ({ name: p.data.title, path: postPath(p.id) })))] : [],
+  }}
+>
+  <section class="bg-tint">
+    <div class="container py-12 lg:py-16">
+      <nav aria-label="Breadcrumb" class="mb-6 text-[0.92rem] text-ink-2"><a href="/" class="text-ink-2">Home</a>{trail.map((c) => <> › <a href={c.path} class="text-ink-2">{c.name}</a></>)} › <span aria-current="page">{crumbs.at(-1)?.name}</span></nav>
+      <h1 class="h-page">{heading}</h1>
+      <p class="lead mt-5 max-w-2xl">{description}</p>
+    </div>
+  </section>
+  <section class="py-14 lg:py-20" aria-label="Posts">
+    <div class="container">
+      {posts.length ? <ul class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{posts.map((p) => <li><PostCard post={p} heading="h2" /></li>)}</ul> : <p>No posts yet.</p>}
+      {
+        pages > 1 && (
+          <nav aria-label="Pages" class="mt-12 flex flex-wrap items-center justify-center gap-2">
+            {page > 1 && <a href={pagePath(page - 1)} rel="prev" class="btn btn-sm btn-secondary">Newer</a>}
+            {Array.from({ length: pages }, (_, i) => i + 1).map((n) =>
+              n === page ? (
+                <span aria-current="page" class="btn btn-sm btn-primary">{n}</span>
+              ) : (
+                <a href={pagePath(n)} class="btn btn-sm btn-secondary" aria-label={`Page ${n}`}>{n}</a>
+              ),
+            )}
+            {page < pages && <a href={pagePath(page + 1)} rel="next" class="btn btn-sm btn-secondary">Older</a>}
+          </nav>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>

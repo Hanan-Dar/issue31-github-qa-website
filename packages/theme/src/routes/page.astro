@@ -1,0 +1,53 @@
+---
+// Every other page: src/content/pages/<path>.yaml → /<path>. Pages switched off in site.config.ts
+// aren't built.
+import type { GetStaticPaths } from "astro";
+import type { CollectionEntry } from "astro:content";
+import site from "virtual:site/config";
+import BlockRenderer from "../blocks/BlockRenderer.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pagePath, publishedPages } from "../lib/content";
+import { faqFromBlocks } from "../lib/page-schema";
+import { type Crumb, itemList } from "../seo/jsonld";
+
+export const getStaticPaths = (async () => {
+  const pages = await publishedPages();
+  const titles = new Map(pages.map((p) => [p.id, p.data.title]));
+  return pages
+    .filter((p) => p.id !== "index")
+    .map((page) => {
+      // Breadcrumb: each parent named by its page's title (Services › Boiler repairs).
+      const parts = page.id.split("/");
+      const crumbs: Crumb[] = parts.map((_, i) => {
+        const id = parts.slice(0, i + 1).join("/");
+        return { name: titles.get(id) ?? parts[i].replace(/-/g, " "), path: pagePath(id) };
+      });
+      // The pages directly under this one, listed for search engines on hub pages.
+      const children = pages
+        .filter((c) => c.id.startsWith(`${page.id}/`) && !c.id.slice(page.id.length + 1).includes("/"))
+        .map((c) => ({ name: c.data.title, path: pagePath(c.id) }));
+      return { params: { slug: page.id }, props: { page, crumbs, children } };
+    });
+}) satisfies GetStaticPaths;
+
+const { page, crumbs, children } = Astro.props as { page: CollectionEntry<"pages">; crumbs: Crumb[]; children: Crumb[] };
+const path = pagePath(page.id);
+const faq = await faqFromBlocks(page.data.blocks, { path });
+const TYPES: Record<string, "AboutPage" | "ContactPage"> = { about: "AboutPage", contact: "ContactPage" };
+---
+
+<BaseLayout
+  title={page.data.seo.title}
+  description={page.data.seo.description}
+  path={path}
+  image={page.data.seo.image}
+  schema={{
+    type: TYPES[page.id],
+    crumbs,
+    faq,
+    dateModified: page.data.updatedAt,
+    nodes: children.length ? [itemList(site, path, children)] : [],
+  }}
+>
+  <BlockRenderer blocks={page.data.blocks} crumbs={crumbs} path={path} />
+</BaseLayout>

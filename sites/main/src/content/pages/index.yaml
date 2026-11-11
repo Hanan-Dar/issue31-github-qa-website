@@ -1,0 +1,109 @@
+title: "Home"
+seo:
+  title: "Issue31 GitHub QA | Plumbing and heating in Leeds"
+  description: "A test plumber in Leeds, made to check new sites on GitHub."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    variant: home
+    eyebrow: "Plumbing and heating in Leeds"
+    title: "Reliable plumbing and heating, done properly the first time"
+    lead: "A test plumber in Leeds, made to check new sites on GitHub."
+    buttons:
+      - label: "Get a free quote"
+        href: /contact
+      - label: "See our services"
+        href: /services
+    points:
+      - Clear, written quotes before any work starts
+      - We turn up when we say we will
+      - Tidy work, and we clean up after ourselves
+      - Every job guaranteed
+
+  - blockType: features
+    eyebrow: What we do
+    title: Plumbing and heating services
+    lead: "From a dripping tap to a new bathroom, one team looks after it all."
+    items:
+      - icon: Flame
+        title: Boiler repairs and servicing
+        text: Annual services, breakdowns and new boilers, with honest advice on whether to repair or replace.
+        href: /services/boiler-repairs
+      - icon: Bath
+        title: Bathroom installation
+        text: Complete bathrooms from design to the last tile, managed by one team from start to finish.
+        href: /services/bathroom-installation
+      - icon: Wrench
+        title: Emergency plumbing
+        text: Burst pipes, leaks and blockages. Call us and we'll tell you straight away when we can be there.
+        href: /services/emergency-plumbing
+
+  - blockType: split
+    tone: white
+    eyebrow: Why choose us
+    title: "A local firm that treats your home like our own"
+    body: |
+      We're a small, local team, so the person who quotes for your job is the person who answers the phone when you have a question.
+
+      We explain what needs doing and why, in plain English, and we never start extra work without asking you first.
+    highlight:
+      title: What you can expect
+      items:
+        - A fixed, written quote
+        - Dust sheets down and shoes off
+        - A clear explanation of the work
+        - Paperwork and guarantees sent by email
+
+  - blockType: steps
+    eyebrow: How it works
+    title: From your first call to a finished job
+    steps:
+      - title: Tell us what you need
+        text: Call, email or use the form. A photo of the problem often helps.
+      - title: Get a clear quote
+        text: We visit if we need to, then send a fixed price in writing.
+      - title: We do the work
+        text: On the day we agree, tidily, keeping you posted as we go.
+      - title: Check and sign off
+        text: We test everything with you and leave the place clean.
+
+  - blockType: testimonials
+    tone: tint
+    eyebrow: Reviews
+    title: What our customers say
+    items:
+      - quote: "Replace this with a real review from a customer, in their own words. Reviews you publish must be genuine."
+        name: Sample review
+        detail: "Boiler service, Leeds"
+        rating: 5
+      - quote: "A second real review goes here, ideally about a different service, with the customer's permission to use it."
+        name: Sample review
+        detail: "Bathroom installation"
+        rating: 5
+      - quote: "A third real review. Short and specific works best: what was done, and how it went."
+        name: Sample review
+        detail: "Emergency call-out"
+        rating: 5
+
+  - blockType: areas
+    eyebrow: Where we work
+    title: "Covering Leeds and the surrounding area"
+    note: "Not sure if we cover you? [Ask us](/contact) and we'll let you know."
+
+  - blockType: faq
+    tone: white
+    title: Common questions
+    items:
+      - question: Do you charge for quotes?
+        answer: No. Quotes are free, and we put every price in writing before any work starts.
+      - question: How soon can you come out?
+        answer: For emergencies we aim to come the same day. For other work we'll agree a date that suits you.
+      - question: Do you guarantee your work?
+        answer: Yes. Every job is guaranteed, and we'll come back and put it right if anything isn't as it should be.
+
+  - blockType: cta
+    title: Need a plumber you can rely on?
+    text: Tell us what you need and we'll get back to you with a clear quote.
+    buttons:
+      - label: Get a free quote
+        href: /contact

@@ -1,0 +1,23 @@
+# Every pull request and every push to main: type checks, the URL contract (no address may break)
+# and the SEO checks. `verify` is the required check on main, so a change that fails it can't be
+# published; a green run on main goes live (promote-prod-main.yml).
+name: verify
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm verify:urls
+      - run: pnpm verify:seo

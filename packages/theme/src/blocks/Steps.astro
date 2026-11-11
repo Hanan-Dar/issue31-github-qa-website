@@ -1,0 +1,26 @@
+---
+// A numbered process ("How it works").
+import type { z } from "astro/zod";
+import type { StepsBlock } from "./schema";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof StepsBlock>; index: number }
+const { data, index } = Astro.props;
+const hid = `block-${index}`;
+---
+
+<Section tone={data.tone} labelledby={hid}>
+  <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+  <ol class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
+    {
+      data.steps.map((s, i) => (
+        <li class="card p-6">
+          <span class="grid h-10 w-10 place-items-center rounded-full bg-primary font-semibold text-on-primary" aria-hidden="true">{i + 1}</span>
+          <h3 class="mt-4 text-xl"><span class="sr-only">Step {i + 1}: </span>{s.title}</h3>
+          <p class="mt-2 text-ink-2 [.tone-dark_&]:text-white/80">{s.text}</p>
+        </li>
+      ))
+    }
+  </ol>
+</Section>

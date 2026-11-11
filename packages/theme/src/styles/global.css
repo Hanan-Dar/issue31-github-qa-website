@@ -1,0 +1,672 @@
+/* The design system. Colours and fonts come from site.config.ts (the integration writes them as
+   CSS variables in virtual:site/theme.css): --brand-primary, --brand-accent, their readable text
+   colours (--brand-on-*), darker shades for text (--brand-*-ink) and --brand-dark for dark bands.
+   The site's shape and type choices (Site styles: corners, shadows, spacing, buttons, headings,
+   eyebrows) arrive as --look-* variables; each falls back to the theme's own look here.
+   Everything else here is shared by every site. */
+
+@import "tailwindcss";
+
+/* The theme package is outside the site's folder, so point Tailwind at it. */
+@source "../";
+
+@theme {
+  --font-sans: var(--font-site-body);
+  --font-heading: var(--font-site-heading);
+
+  --color-page: #fbfaf8;
+  --color-ink: #16181d;
+  --color-ink-2: #3d424b;
+  --color-ink-3: #5a606b;
+  --color-line: #e6e3de;
+
+  --color-primary: var(--brand-primary);
+  --color-on-primary: var(--brand-on-primary);
+  --color-primary-ink: var(--brand-primary-ink);
+  --color-accent: var(--brand-accent);
+  --color-on-accent: var(--brand-on-accent);
+  --color-accent-ink: var(--brand-accent-ink);
+  --color-dark: var(--brand-dark);
+  --color-tint: color-mix(in oklab, var(--brand-primary) 8%, white);
+  --color-tint-2: color-mix(in oklab, var(--brand-primary) 16%, white);
+
+  --radius-card: var(--look-radius-card, 1.1rem);
+  --shadow-card: var(--look-shadow-card, 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -12px rgb(16 24 40 / 0.12));
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-page font-sans text-ink antialiased;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading text-ink;
+    font-weight: var(--look-heading-weight, 600);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  a {
+    @apply text-primary-ink underline decoration-1 underline-offset-[0.2em];
+  }
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+  :focus-visible {
+    outline: 3px solid var(--brand-primary-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .container {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+  .eyebrow {
+    @apply text-sm font-semibold text-primary-ink;
+    letter-spacing: var(--look-eyebrow-spacing, 0.12em);
+    text-transform: var(--look-eyebrow-case, uppercase);
+  }
+  .eyebrow-icon {
+    @apply h-4 w-4 shrink-0 text-accent-ink;
+  }
+  .h-display {
+    font-size: calc(clamp(2.4rem, 5.6vw, 4.2rem) * var(--look-heading-scale, 1));
+    line-height: 1.04;
+  }
+  .h-page {
+    font-size: calc(clamp(2.1rem, 4.4vw, 3.3rem) * var(--look-heading-scale, 1));
+    line-height: 1.08;
+  }
+  .h-section {
+    font-size: calc(clamp(1.75rem, 3.2vw, 2.5rem) * var(--look-heading-scale, 1));
+  }
+  .section-y {
+    padding-block: var(--look-section-y, 4rem);
+  }
+  @media (min-width: 64rem) {
+    .section-y {
+      padding-block: var(--look-section-y-lg, 6rem);
+    }
+  }
+  .lead {
+    @apply text-ink-2;
+    font-size: clamp(1.1rem, 1.6vw, 1.25rem);
+    line-height: 1.6;
+  }
+  .card {
+    @apply rounded-[var(--radius-card)] border border-line bg-white shadow-[var(--shadow-card)];
+  }
+  .icon-tile {
+    @apply inline-grid h-12 w-12 shrink-0 place-items-center rounded-[var(--look-radius-tile,0.75rem)] bg-tint text-primary-ink;
+  }
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-[var(--look-radius-btn,9999px)] px-6 py-3 text-base font-semibold no-underline transition-colors;
+  }
+  .btn-primary {
+    @apply hover:brightness-110;
+    background: var(--look-btn-bg, var(--color-primary));
+    color: var(--look-btn-fg, var(--color-on-primary));
+    border: 2px solid var(--look-btn-border, transparent);
+  }
+  .btn-secondary {
+    @apply border border-ink/20 bg-white text-ink hover:border-ink/40;
+  }
+  .btn-sm {
+    @apply min-h-10 px-4 py-2 text-[0.95rem];
+  }
+
+  /* Section backgrounds (a block's `tone`). */
+  .tone-plain {
+    @apply bg-page;
+  }
+  .tone-white {
+    @apply bg-white;
+  }
+  .tone-tint {
+    @apply bg-tint;
+  }
+  .tone-dark {
+    @apply bg-dark text-white;
+  }
+  .tone-dark :is(h1, h2, h3, h4) {
+    @apply text-white;
+  }
+  .tone-dark a:not(.btn) {
+    @apply text-white;
+  }
+  .tone-dark .eyebrow,
+  .tone-dark .lead {
+    @apply text-white/85;
+  }
+  .tone-dark .card {
+    @apply border-white/15 bg-white/5 text-white shadow-none;
+  }
+  .tone-dark .icon-tile {
+    @apply bg-white/10 text-white;
+  }
+  .tone-dark .btn-primary {
+    @apply border-transparent bg-accent text-on-accent;
+  }
+  .tone-dark .btn-secondary {
+    @apply border-white/40 bg-transparent text-white;
+  }
+
+  /* A Posts carousel's item: as wide as the items in view (--view, per screen size) and the part of
+     the next one showing (--peek) allow, with the list's gap (--gap) between them (blocks/posts/). */
+  .carousel-item {
+    flex: none;
+    width: calc((100% - (var(--view, 1) - 1 + var(--peek, 0)) * var(--gap, 1.25rem)) / (var(--view, 1) + var(--peek, 0)));
+  }
+
+  /* A gallery's lightbox (blocks/gallery/): the page under it stays still while it's open. */
+  html:has(dialog[data-lightbox][open]) {
+    overflow: hidden;
+  }
+
+  /* Markdown bodies. */
+  .prose-site {
+    @apply max-w-[68ch] text-ink-2;
+  }
+  .prose-site > * + * {
+    margin-top: 1em;
+  }
+  .prose-site :is(h2, h3) {
+    margin-top: 1.6em;
+  }
+  .prose-site h2 {
+    font-size: 1.6rem;
+  }
+  .prose-site h3 {
+    font-size: 1.3rem;
+  }
+  .prose-site ul {
+    @apply list-disc pl-6;
+  }
+  .prose-site ol {
+    @apply list-decimal pl-6;
+  }
+  .prose-site li + li {
+    margin-top: 0.35em;
+  }
+  .prose-site strong {
+    @apply text-ink;
+  }
+  .prose-site table {
+    @apply w-full border-collapse text-left text-[0.95rem];
+  }
+  /* Phones: a table wider than the screen (an imported comparison) scrolls on its own, never the page. */
+  @media (max-width: 639px) {
+    .prose-site table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .prose-site :is(th, td) {
+      min-width: 9rem;
+    }
+  }
+  .prose-site :is(th, td) {
+    @apply border-b border-line px-3 py-2;
+  }
+  .prose-site blockquote {
+    @apply border-l-4 border-primary pl-4 italic;
+  }
+  .tone-dark .prose-site,
+  .tone-dark .prose-site strong {
+    @apply text-white/90;
+  }
+}
+
+@keyframes craeft-strip {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Widgets' states set by their scripts: outside the layers, so they win over the utilities they change. */
+/* A Logos strip (blocks/logos/, <craeft-marquee>): still unless its script runs (data-run); then it
+   loops slowly (the items are there twice), stops while pointed at, focused or paused, and never
+   moves for people who ask for less motion. */
+craeft-marquee[data-run] [data-viewport] {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+craeft-marquee[data-run] [data-strip] {
+  animation: craeft-strip var(--strip-time, 40s) linear infinite;
+}
+craeft-marquee[data-run]:is(:hover, :focus-within, [data-paused]) [data-strip] {
+  animation-play-state: paused;
+}
+craeft-marquee[data-paused] [data-icon-pause],
+craeft-marquee:not([data-paused]) [data-icon-play] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  craeft-marquee [data-strip] {
+    animation: none !important;
+  }
+}
+
+/* A Pricing switch (blocks/Pricing.astro, <craeft-toggle>): with no script, the monthly price and
+   the yearly one listed under it; with it (data-period), one or the other. */
+craeft-toggle [data-price="yearly"],
+craeft-toggle[data-period] [data-price="both"],
+craeft-toggle[data-period="yearly"] [data-price="monthly"] {
+  display: none;
+}
+craeft-toggle[data-period="yearly"] [data-price="yearly"] {
+  display: flex;
+}
+
+/* Before and after (blocks/BeforeAfter.astro, <craeft-compare>): side by side with no script; with
+   it (data-ready), one over the other, the after picture shown right of the handle (--pos). */
+craeft-compare[data-ready] [data-pair] {
+  grid-template-columns: 1fr;
+  gap: 0;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  cursor: ew-resize;
+  touch-action: pan-y;
+  user-select: none;
+}
+craeft-compare[data-ready] [data-pair] > * {
+  grid-area: 1 / 1;
+  border-radius: 0;
+}
+craeft-compare[data-ready] [data-after] {
+  clip-path: inset(0 0 0 var(--pos, 50%));
+}
+/* The handle is dragged sideways on touch screens too: the browser neither scrolls nor pans for it. */
+craeft-compare[data-ready] [data-handle] {
+  touch-action: none;
+}
+
+/* A post with its sidebar (routes/blog/post.astro, the "post-sidebar" widget area): under the text on
+   phones; beside it on wide screens, the post's title lined up with its text and the page as wide as
+   other pages. Outside the layers, so it wins over the post's own max-w-3xl. */
+.post-sidebar-on :is(.post-head, .post-body) {
+  max-width: 72rem;
+}
+.post-sidebar-on .post-head > * {
+  max-width: 48rem;
+}
+.post-sidebar-on .post-sidebar {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-line);
+}
+@media (min-width: 64rem) {
+  .post-sidebar-on .post-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    column-gap: 4rem;
+    align-items: start;
+  }
+  .post-sidebar-on .post-sidebar {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* ---- Looks (phase 22): the whole design, on <html data-design>, and its motion (data-motion). ----
+   The smaller Site styles (corners, shadows, spacing, buttons, headings) come with each look as
+   --look-* variables; these are what a look changes beyond them: the top section, the page's
+   ground, type details and small flourishes. Nothing here hides content: without these rules the
+   page is the friendly look. */
+
+/* Friendly local: the theme as it was, with photos rounded and the top a soft tint; without a
+   photo, a card with the phone number and hours beside the title. */
+html[data-design="friendly"] .hero-card {
+  display: block;
+  rotate: -1deg;
+}
+@media (min-width: 64rem) {
+  html[data-design="friendly"] .hero-split {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+html[data-design="friendly"] .hero-home .hero-media {
+  border-radius: calc(var(--radius-card) * 1.6);
+  rotate: 1.5deg;
+}
+
+/* Premium: a warm paper ground, fine rules, a centred serif top with the photo below it. */
+html[data-design="premium"] body {
+  background: #f8f5ef;
+}
+html[data-design="premium"] .hero {
+  background: transparent;
+  border-bottom: 1px solid var(--color-line);
+}
+html[data-design="premium"] .hero-glow {
+  display: none;
+}
+html[data-design="premium"] .hero-home .hero-inner {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+html[data-design="premium"] .hero-home .hero-copy {
+  max-width: 48rem;
+}
+html[data-design="premium"] .hero-home .hero-copy > :is(div, ul) {
+  justify-content: center;
+}
+html[data-design="premium"] .hero-home .hero-media {
+  aspect-ratio: 21 / 9;
+  max-width: 72rem;
+}
+html[data-design="premium"] .h-display {
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+}
+html[data-design="premium"] .eyebrow {
+  font-style: italic;
+  font-weight: 500;
+}
+html[data-design="premium"] .card {
+  background: transparent;
+}
+
+/* Bold modern: a dark top in the main colour, very big type, a bright accent, strong bands. */
+html[data-design="bold"] .hero-home {
+  background:
+    radial-gradient(80% 60% at 85% 10%, color-mix(in oklab, var(--brand-accent) 35%, transparent), transparent 60%),
+    linear-gradient(160deg, var(--brand-dark), color-mix(in oklab, var(--brand-primary) 75%, black));
+  color: white;
+  min-height: min(92vh, 56rem);
+  display: grid;
+  align-items: center;
+}
+html[data-design="bold"] .hero-home :is(h1, h2, .lead, li, .eyebrow) {
+  color: white;
+}
+html[data-design="bold"] .hero-home .lead {
+  color: rgb(255 255 255 / 0.82);
+}
+html[data-design="bold"] .hero-home .eyebrow-icon,
+html[data-design="bold"] .hero-home li svg {
+  color: var(--brand-accent);
+}
+html[data-design="bold"] .hero-home .btn-primary {
+  background: var(--brand-accent);
+  color: var(--brand-on-accent);
+}
+html[data-design="bold"] .hero-home .btn-secondary {
+  background: rgb(255 255 255 / 0.08);
+  border-color: rgb(255 255 255 / 0.35);
+  color: white;
+}
+html[data-design="bold"] .hero-home .h-display {
+  font-size: calc(clamp(2.8rem, 8vw, 6.2rem) * var(--look-heading-scale, 1));
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+}
+html[data-design="bold"] .hero-home .hero-glow {
+  opacity: 0.6;
+}
+html[data-design="bold"] .h-section {
+  letter-spacing: -0.025em;
+}
+html[data-design="bold"] .eyebrow {
+  color: var(--brand-accent-ink);
+}
+
+/* Clean minimal: white, sharp, quiet; the main colour only where it matters. */
+html[data-design="minimal"] body {
+  background: white;
+}
+html[data-design="minimal"] .hero {
+  background: white;
+  border-bottom: 1px solid var(--color-line);
+}
+html[data-design="minimal"] .hero-glow {
+  display: none;
+}
+html[data-design="minimal"] .hero-home .h-display {
+  letter-spacing: -0.03em;
+}
+html[data-design="minimal"] .card {
+  box-shadow: none;
+}
+html[data-design="minimal"] .tone-tint {
+  background: #f6f7f8;
+}
+
+/* The wow level's 3D background (motion/wow.ts): only once it's drawing. */
+.hero-3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+.hero-3d.is-on {
+  opacity: 1;
+}
+html:not([data-design="bold"]) .hero-3d.is-on {
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+}
+
+/* Calm (and the fallback for every level without JavaScript): each section fades and rises in as
+   it scrolls into view, with CSS alone (browsers without scroll-driven animations show it at once). */
+@keyframes craeft-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    html:not(.motion-js) [data-reveal] {
+      animation: craeft-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* Wow's cursor (motion/wow.ts adds it on devices with a mouse). */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 300;
+  pointer-events: none;
+  border-radius: 9999px;
+}
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: var(--brand-accent);
+}
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 1.5px solid color-mix(in oklab, var(--brand-primary) 60%, transparent);
+  transition:
+    width 0.25s ease,
+    height 0.25s ease,
+    margin 0.25s ease,
+    opacity 0.25s ease,
+    background-color 0.25s ease;
+}
+.cursor-ring.is-over {
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  background: color-mix(in oklab, var(--brand-accent) 18%, transparent);
+  border-color: transparent;
+}
+.cursor-ring.is-down {
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+}
+.cursor-ring.is-away {
+  opacity: 0;
+}
+
+/* ---- The looks below the top section (design review, 2026-11-04): each carries its design down
+   the page, not only in the hero. */
+
+/* Bold modern: a short accent bar before each eyebrow, solid icon tiles, cards that lift, an accent
+   line on top of cards, and the tinted bands turned into dark ones for rhythm. */
+html[data-design="bold"] .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+html[data-design="bold"] .section-head .eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--brand-accent);
+}
+html[data-design="bold"] .icon-tile {
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+html[data-design="bold"] .card {
+  border-top: 3px solid var(--brand-primary);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+html[data-design="bold"] .card:hover {
+  transform: translateY(-4px);
+}
+html[data-design="bold"] .tone-tint {
+  background:
+    radial-gradient(60% 80% at 100% 0%, color-mix(in oklab, var(--brand-accent) 22%, transparent), transparent 70%),
+    var(--brand-dark);
+}
+html[data-design="bold"] .tone-tint .section-head :is(h2, .lead) {
+  color: white;
+}
+html[data-design="bold"] .tone-tint .section-head .lead {
+  color: rgb(255 255 255 / 0.78);
+}
+html[data-design="bold"] .tone-tint .section-head .eyebrow {
+  color: var(--brand-accent);
+}
+html[data-design="bold"] .h-section {
+  font-size: calc(clamp(2rem, 4vw, 3.1rem) * var(--look-heading-scale, 1));
+  line-height: 1.05;
+}
+
+/* Premium: centred section openings with a fine rule, outlined icons, more room in cards. */
+html[data-design="premium"] .section-head {
+  margin-inline: auto;
+  text-align: center;
+}
+html[data-design="premium"] .section-head::after {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 1px;
+  margin: 1.5rem auto 0;
+  background: var(--brand-accent);
+}
+html[data-design="premium"] .icon-tile {
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--brand-primary) 30%, transparent);
+  border-radius: 9999px;
+}
+html[data-design="premium"] .card {
+  padding: 2rem;
+}
+
+/* Clean minimal: one white ground, flat outlined icons, and the contact details beside the title
+   (square and flat) so the top isn't half empty on a computer. */
+html[data-design="minimal"] :is(.tone-plain, .tone-white) {
+  background: white;
+}
+html[data-design="minimal"] .icon-tile {
+  background: transparent;
+  border: 1px solid var(--color-line);
+}
+html[data-design="minimal"] .hero-card {
+  display: block;
+  box-shadow: none;
+  border-color: var(--color-ink);
+}
+@media (min-width: 64rem) {
+  html[data-design="minimal"] .hero-split {
+    grid-template-columns: 1.3fr 0.7fr;
+  }
+}
+/* …but a heading in a column beside something else (Split) stays left, as its column reads. */
+html[data-design="premium"] :where([class*="grid-cols"]) .section-head {
+  margin-inline: 0;
+  text-align: left;
+}
+html[data-design="premium"] :where([class*="grid-cols"]) .section-head::after {
+  margin-left: 0;
+}
+
+/* Phones: the call bar at the bottom of the screen (components/CallBar.astro), with room left for
+   it under the footer. */
+.call-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 150;
+  /* Phones only (the header has these from tablets up); shown below. */
+  display: none;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom));
+  background: color-mix(in oklab, white 92%, transparent);
+  border-top: 1px solid var(--color-line);
+  backdrop-filter: blur(10px);
+}
+.call-bar .btn {
+  min-height: 3rem;
+  padding-inline: 0.75rem;
+  white-space: nowrap;
+}
+@media (max-width: 39.99rem) {
+  .call-bar {
+    display: flex;
+  }
+  body:has(.call-bar) {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+}
+html[data-design="bold"] .call-bar .btn-primary {
+  background: var(--brand-accent);
+  color: var(--brand-on-accent);
+}

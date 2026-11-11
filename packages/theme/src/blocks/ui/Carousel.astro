@@ -1,0 +1,101 @@
+---
+// A widget's carousel (Posts, Gallery, Reviews): a list that scrolls sideways and snaps to each item
+// (plain CSS, so it works with no script), which <craeft-carousel> gives arrows, dots and, only when
+// turned on, autoplay with a pause button. In Craeft's editor (preview builds) it never autoplays.
+// The items are the default slot: <li class="carousel-item snap-start" aria-label="1 of 6">…</li>.
+import { editorMarkers } from "../../lib/preview";
+import { viewClass } from "../posts/layout";
+import ScriptCarousel from "../posts/ScriptCarousel.astro";
+
+interface Props {
+  /** The section's carousel settings (Carousel and Layout groups). */
+  data: {
+    arrows: "beside" | "under" | "none";
+    dots: boolean;
+    autoplay: number;
+    carouselEnd: "stop" | "start";
+    carouselScroll: "item" | "view";
+    carouselView?: { desktop: number; tablet?: number; phone?: number };
+    carouselPeek: boolean;
+    gap: "s" | "m" | "l";
+    equalHeights?: boolean;
+  };
+  /** Each item's dot label ("Show 2: <its title>"); also how many items there are. */
+  dots: string[];
+  label: string;
+}
+const { data, dots: dotLabels, label } = Astro.props;
+const n = dotLabels.length;
+const beside = data.arrows === "beside";
+const under = data.arrows === "under";
+const autoplay = data.autoplay >= 3 ? data.autoplay : 0;
+// Past 10 items, a count ("3 / 14") instead of dots.
+const dots = data.dots && n <= 10;
+const count = data.dots && n > 10;
+const GAP_VAR = { s: "gap-3 [--gap:0.75rem]", m: "gap-5 [--gap:1.25rem]", l: "gap-8 [--gap:2rem]" } as const;
+const button =
+  "inline-grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-white text-ink shadow-sm hover:border-ink/40 disabled:opacity-40 [.tone-dark_&]:border-white/30 [.tone-dark_&]:bg-white/10 [.tone-dark_&]:text-white";
+const chevron = (d: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true" focusable="false"><path d="${d}"></path></svg>`;
+const PREV = chevron("m15 18-6-6 6-6");
+const NEXT = chevron("m9 18 6-6-6-6");
+---
+
+<craeft-carousel
+  class="mt-10 block"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label={label}
+  data-autoplay={autoplay || undefined}
+  data-end={data.carouselEnd}
+  data-scroll={data.carouselScroll}
+  data-still={editorMarkers ? "" : undefined}
+>
+  <div class="flex items-center gap-3">
+    {beside && <button type="button" class={button} data-prev hidden aria-label="Previous" set:html={PREV} />}
+    <ul
+      data-track
+      tabindex="0"
+      aria-label={label}
+      class:list={[
+        "flex min-w-0 flex-1 snap-x snap-mandatory overflow-x-auto scroll-smooth pb-3 [scrollbar-width:thin] motion-reduce:scroll-auto",
+        GAP_VAR[data.gap],
+        viewClass(data.carouselView),
+        data.carouselPeek ? "[--peek:0.25]" : "[--peek:0]",
+        data.equalHeights === false && "items-start",
+      ]}
+    >
+      <slot />
+    </ul>
+    {beside && <button type="button" class={button} data-next hidden aria-label="Next" set:html={NEXT} />}
+  </div>
+  {
+    (under || dots || count || autoplay > 0) && (
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-4">
+        {under && <button type="button" class={button} data-prev hidden aria-label="Previous" set:html={PREV} />}
+        {dots && (
+          <div data-dots hidden class="flex flex-wrap items-center gap-1">
+            {dotLabels.map((text, i) => (
+              <button
+                type="button"
+                data-dot={i}
+                aria-label={text}
+                aria-current={i === 0 ? "true" : "false"}
+                class="group/dot grid h-8 w-8 place-items-center"
+              >
+                <span class="h-2.5 w-2.5 rounded-full bg-ink/25 group-aria-[current=true]/dot:bg-primary [.tone-dark_&]:bg-white/40 [.tone-dark_&]:group-aria-[current=true]/dot:bg-white" />
+              </button>
+            ))}
+          </div>
+        )}
+        {count && <p data-count hidden class="text-sm text-ink-2 [.tone-dark_&]:text-white/80"><span data-count-now>1</span> / {n}</p>}
+        {under && <button type="button" class={button} data-next hidden aria-label="Next" set:html={NEXT} />}
+        {autoplay > 0 && (
+          <button type="button" class="btn btn-sm btn-secondary" data-pause hidden data-play="Play" data-pause-text="Pause">
+            <span data-pause-label>Pause</span>
+          </button>
+        )}
+      </div>
+    )
+  }
+</craeft-carousel>
+<ScriptCarousel />

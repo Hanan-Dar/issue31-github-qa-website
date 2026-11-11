@@ -1,0 +1,115 @@
+---
+// Pictures chosen by the section's settings. Which pictures, in what order: Craeft's widgets
+// (packages/widgets, plan/ux/widgets.md); how they look: here and in gallery/. Typed here, or one of
+// the site's albums (src/content/albums/); an album that's gone shows nothing (and says why in
+// previews), never a failed build.
+import { getEntry } from "astro:content";
+import { galleryFilters, selectPictures } from "@craeft/widgets/gallery";
+import { tagSlug } from "@craeft/widgets/posts";
+import type { z } from "astro/zod";
+import { editorMarkers } from "../lib/preview";
+import { pageSeed } from "../lib/posts";
+import Lightbox from "./gallery/Lightbox.astro";
+import { GALLERY_GAP, galleryColumns, MASONRY_GAP, SHAPE } from "./gallery/layout";
+import Picture from "./gallery/Picture.astro";
+import ScriptEntrance from "./posts/ScriptEntrance.astro";
+import ScriptFilter from "./posts/ScriptFilter.astro";
+import { ENTRANCE } from "./posts/layout";
+import type { GalleryBlock } from "./schema";
+import UiCarousel from "./ui/Carousel.astro";
+import Section from "./ui/Section.astro";
+import SectionHeader from "./ui/SectionHeader.astro";
+
+interface Props { data: z.infer<typeof GalleryBlock>; index: number; page?: { path?: string; commit?: string } }
+const { data, index, page } = Astro.props;
+const album = data.show === "album" && data.album ? await getEntry("albums", data.album) : undefined;
+const sel = selectPictures(data, album && data.album ? { [data.album]: album.data } : {}, { seed: pageSeed(page) });
+const pictures = sel.items;
+const hid = `block-${index}`;
+const layout = data.layout;
+const carousel = layout === "carousel";
+const masonry = layout === "masonry";
+const filterTags = galleryFilters(data, pictures);
+const filter = filterTags.length > 1;
+const lightbox = data.click === "lightbox";
+const entrance = data.entrance !== "none" && !carousel;
+const Box = lightbox ? "craeft-lightbox" : Fragment;
+const Filter = filter ? "craeft-filter" : Fragment;
+const Enter = entrance ? "craeft-entrance" : Fragment;
+const wrap = (on: boolean, attrs: Record<string, unknown>) => (on ? { class: "block", ...attrs } : {});
+// In previews, an empty gallery shows grey tiles in its layout, so a change of layout shows.
+const view = data.carouselView?.desktop ?? 3;
+const placeholderColumns = carousel ? galleryColumns({ desktop: view, tablet: view, phone: 1 }, false) : galleryColumns(data.columns, masonry);
+const MASONRY_SHAPES = ["aspect-[4/5]", "aspect-[4/3]", "aspect-square", "aspect-[3/4]", "aspect-video", "aspect-[4/3]"];
+// Where each picture is kept (Craeft's "Edit this picture", previews only): its album and place, or its place here.
+const kept = album && data.album ? album.data.pictures : (data.pictures ?? []);
+const from = (p: (typeof pictures)[number]) => {
+  const n = kept.findIndex((x) => x.src === p.src && x.alt === p.alt);
+  return n < 0 ? undefined : album && data.album ? `album:${data.album}:${n}` : `pictures.${n}`;
+};
+const tags = (p: (typeof pictures)[number]) => (filter ? [...new Set((p.tags ?? []).map(tagSlug).filter(Boolean))].join(" ") : undefined);
+---
+
+{
+  pictures.length > 0 && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      <Box {...wrap(lightbox, {})}>
+        {carousel ? (
+          <UiCarousel data={data} dots={pictures.map((p, i) => `Show ${i + 1}: ${p.alt}`)} label={data.title}>
+            {pictures.map((p, i) => (
+              <li class="carousel-item snap-start" aria-label={`${i + 1} of ${pictures.length}`}>
+                <Picture data={data} picture={p} from={from(p)} />
+              </li>
+            ))}
+          </UiCarousel>
+        ) : (
+          <Enter {...wrap(entrance, { "data-still": editorMarkers ? "" : undefined })}>
+            <Filter {...wrap(filter, {})}>
+              {filter && (
+                <div data-filter hidden role="group" aria-label="Show pictures tagged" class="mt-8 flex flex-wrap gap-2">
+                  <button type="button" data-tag="" aria-pressed="true" class="btn btn-sm btn-secondary aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white">All</button>
+                  {filterTags.map((t) => (
+                    <button type="button" data-tag={t.slug} aria-pressed="false" class="btn btn-sm btn-secondary aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white">{t.name}</button>
+                  ))}
+                </div>
+              )}
+              <ul class:list={[filter ? "mt-6" : "mt-10", masonry ? ["block", MASONRY_GAP[data.gap]] : ["grid", GALLERY_GAP[data.gap]], galleryColumns(data.columns, masonry)]}>
+                {pictures.map((p) => (
+                  <li data-tags={tags(p)} class:list={[masonry && "break-inside-avoid", filter && "data-off:hidden", ENTRANCE[data.entrance]]}>
+                    <Picture data={data} picture={p} natural={masonry} from={from(p)} />
+                  </li>
+                ))}
+              </ul>
+            </Filter>
+          </Enter>
+        )}
+        {lightbox && <Lightbox label={data.title} />}
+      </Box>
+    </Section>
+  )
+}
+{
+  pictures.length === 0 && (data.emptyText || editorMarkers) && (
+    <Section tone={data.tone} labelledby={hid}>
+      <SectionHeader id={hid} eyebrow={data.eyebrow} title={data.title} lead={data.lead} />
+      {data.emptyText && <p class="mt-6 text-ink-2 [.tone-dark_&]:text-white/80">{data.emptyText}</p>}
+      {editorMarkers && (
+        <div data-craeft-empty class="mt-6 rounded-[var(--radius-card)] border-2 border-dashed border-ink/25 p-6 text-ink-2 [.tone-dark_&]:border-white/40 [.tone-dark_&]:text-white/85">
+          <strong>No pictures show.</strong> {sel.reason ?? ""} Visitors don't see this box.
+        </div>
+      )}
+      {editorMarkers && (
+        <ul aria-hidden="true" class:list={["mt-6", masonry ? ["block", MASONRY_GAP[data.gap]] : ["grid", GALLERY_GAP[data.gap]], placeholderColumns]}>
+          {Array.from({ length: carousel ? (data.carouselView?.desktop ?? 3) : 6 }, (_, i) => (
+            <li class:list={[masonry && "break-inside-avoid"]}>
+              <div class:list={["rounded-[var(--radius-card)] bg-ink/10 [.tone-dark_&]:bg-white/15", masonry ? MASONRY_SHAPES[i % MASONRY_SHAPES.length] : SHAPE[data.shape] || "aspect-[4/3]"]} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  )
+}
+{filter && <ScriptFilter />}
+{entrance && <ScriptEntrance />}

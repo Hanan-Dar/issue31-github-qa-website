@@ -1,0 +1,24 @@
+---
+// The blog's index (/<blog path> from site.config.ts): every post, newest first; or, when the site sets
+// `blog.perPage`, its newest posts, then /<blog>/page/2 … (paged.astro).
+import site from "virtual:site/config";
+import BlogList from "../../components/BlogList.astro";
+import { publishedPosts } from "../../lib/content";
+import { BLOG_PAGE_SIZE, blogPagePath } from "../../lib/posts";
+
+const blog = site.blog!;
+const path = `/${blog.path}`;
+const posts = await publishedPosts();
+---
+
+<BlogList
+  title={`${blog.title} | ${site.name}`}
+  description={blog.description}
+  heading={blog.title}
+  path={path}
+  crumbs={[{ name: blog.title, path }]}
+  posts={posts}
+  page={1}
+  pagePath={blogPagePath}
+  perPage={BLOG_PAGE_SIZE}
+/>

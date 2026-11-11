@@ -1,0 +1,50 @@
+---
+// A widget area's widgets (blocks/schema.ts AREAS: the footer's columns, a post's sidebar), each in
+// its place, marked for Craeft's Edit in previews as a page's sections are (data-craeft-block, inside
+// the area's data-craeft-area). Posts widgets are chosen for the whole area at once; beside a post
+// (`current`), "Not the post you're on" leaves it out.
+import { postSelections } from "../../lib/posts";
+import type { PostSelection } from "../../lib/posts";
+import { mark } from "../../lib/preview";
+import Archive from "../Archive.astro";
+import BusinessDetails from "../BusinessDetails.astro";
+import type { AreaBlock, AreaName } from "../schema";
+import SocialLinks from "../SocialLinks.astro";
+import TagList from "../TagList.astro";
+import AreaCta from "./AreaCta.astro";
+import AreaText from "./AreaText.astro";
+import RecentPosts from "./RecentPosts.astro";
+
+interface Props {
+  area: AreaName;
+  blocks: AreaBlock[];
+  /** The page's address and commit (Craeft's Edit sends both): shuffled lists start from them. */
+  path?: string;
+  commit?: string;
+  /** The post whose page this is, if it is one. */
+  current?: string;
+  /** The first block's place in the area (Craeft's Edit draws one at a time). */
+  offset?: number;
+  /** Each Posts widget's posts for the whole area, when `blocks` is part of it. */
+  selections?: (PostSelection | undefined)[];
+  /** Each widget's wrapper's classes (a column of the footer's grid). */
+  class?: string;
+}
+const { area, blocks, path, commit, current, offset = 0, class: cls } = Astro.props;
+const selections = Astro.props.selections?.slice(offset) ?? (await postSelections(blocks, { path, commit, current }));
+const id = (i: number) => `${area}-${offset + i}`;
+---
+
+{
+  blocks.map((data, i) => (
+    <div class={cls} {...mark({ block: offset + i, type: data.blockType })}>
+      {data.blockType === "posts" && <RecentPosts data={data} hid={id(i)} selection={selections[i]} />}
+      {data.blockType === "tag-list" && <TagList data={data} index={i} place="area" hid={id(i)} />}
+      {data.blockType === "archive" && <Archive data={data} index={i} place="area" hid={id(i)} />}
+      {data.blockType === "business-details" && <BusinessDetails data={data} index={i} place="area" hid={id(i)} />}
+      {data.blockType === "social-links" && <SocialLinks data={data} index={i} place="area" hid={id(i)} />}
+      {data.blockType === "cta" && <AreaCta data={data} hid={id(i)} />}
+      {data.blockType === "prose" && <AreaText data={data} hid={id(i)} />}
+    </div>
+  ))
+}

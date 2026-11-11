@@ -1,0 +1,37 @@
+title: "Reviews"
+seo:
+  title: "Customer reviews | Issue31 GitHub QA, Leeds"
+  description: "What customers in and around Leeds say about Issue31 GitHub QA: real reviews of our plumbing, heating and bathroom work."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    title: What our customers say
+    lead: "We're proud of the reviews our customers leave. Here are a few of them."
+
+  - blockType: testimonials
+    title: Recent reviews
+    lead: "These are samples: replace them with genuine reviews, used with each customer's permission."
+    items:
+      - quote: "Replace this with a real review from a customer, in their own words."
+        name: Sample review
+        detail: "Boiler replacement"
+        rating: 5
+      - quote: "Another real review goes here. Specific details (what was done, how it went) are the most useful to readers."
+        name: Sample review
+        detail: "New bathroom"
+        rating: 5
+      - quote: "Short reviews work well too."
+        name: Sample review
+        detail: "Leak repair"
+        rating: 5
+      - quote: "Add as many as you like; the newest first is a good order."
+        name: Sample review
+        detail: "Radiator fitting"
+        rating: 5
+
+  - blockType: cta
+    title: Join our happy customers
+    text: Tell us what you need and we'll send you a clear, written quote.
+    buttons:
+      - label: Get a quote
+        href: /contact
