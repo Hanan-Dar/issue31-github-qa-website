@@ -107,3 +107,18 @@ blocks:
     buttons:
       - label: Get a free quote
         href: /contact
+
+  - blockType: hero
+    variant: home
+    eyebrow: Eyebrow
+    title: Title
+    lead: Lead
+    buttons:
+      - label: Label
+        href: /contact
+      - label: Label
+        href: /services
+    points:
+      - Point
+      - Point
+      - Point
