@@ -144,10 +144,15 @@ export const SplitBlock = z
     /** Put the image (or the highlight box) on the left on wide screens. */
     reverse: z.boolean().optional(),
     /** A highlight box beside the text when there's no image. */
-    highlight: z.object({ title: z.string(), items: z.array(z.string()).min(1).max(6) }).strict().optional(),
+    highlight: z
+      .object({ title: z.string(), items: z.array(z.string()).min(1) })
+      .strict()
+      .optional()
+      // Said in Edit: with a picture, the box isn't shown (beta run 1, 2026-11-16).
+      .meta({ title: "Highlight", description: "Shown only when the section has no picture: a picture takes its place." }),
   })
   .strict()
-  .meta({ title: "Text and picture", description: "Words with a photo or a short list beside them." });
+  .meta({ title: "Text and picture", description: "Text beside a picture or a highlight box (one of the two)." });
 
 export const StepsBlock = z
   .object({

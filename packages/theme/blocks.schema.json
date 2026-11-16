@@ -347,6 +347,8 @@
                   "type": "boolean"
                 },
                 "highlight": {
+                  "title": "Highlight",
+                  "description": "Shown only when the section has no picture: a picture takes its place.",
                   "type": "object",
                   "properties": {
                     "title": {
@@ -374,7 +376,7 @@
               ],
               "additionalProperties": false,
               "title": "Text and picture",
-              "description": "Text beside a picture or a highlight box."
+              "description": "Text beside a picture or a highlight box (one of the two)."
             },
             {
               "type": "object",
@@ -6684,6 +6686,8 @@
                 "type": "boolean"
               },
               "highlight": {
+                "title": "Highlight",
+                "description": "Shown only when the section has no picture: a picture takes its place.",
                 "type": "object",
                 "properties": {
                   "title": {
@@ -6711,7 +6715,7 @@
             ],
             "additionalProperties": false,
             "title": "Text and picture",
-            "description": "Text beside a picture or a highlight box."
+            "description": "Text beside a picture or a highlight box (one of the two)."
           },
           {
             "type": "object",
