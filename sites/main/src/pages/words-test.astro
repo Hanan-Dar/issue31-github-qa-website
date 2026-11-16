@@ -1,0 +1,11 @@
+---
+// A test page written in code (issue #46): its own words and the footer's share a tagline.
+import BaseLayout from "../../../../packages/theme/src/layouts/BaseLayout.astro";
+---
+<BaseLayout title="Words test" description="A test page for issue 46." path="/words-test" noindex>
+  <main class="mx-auto max-w-3xl px-6 py-16">
+    <h1 class="text-4xl font-semibold">Words test</h1>
+    <p class="mt-4">A test plumber in Leeds, made to check new sites on GitHub.</p>
+    <p class="mt-2">This page is only for a test and is removed afterwards.</p>
+  </main>
+</BaseLayout>
