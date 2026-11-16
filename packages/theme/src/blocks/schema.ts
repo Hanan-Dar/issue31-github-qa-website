@@ -144,12 +144,6 @@ export const SplitBlock = z
     /** Put the image (or the highlight box) on the left on wide screens. */
     reverse: z.boolean().optional(),
     /** A highlight box beside the text when there's no image. */
-<<<<<<< site: packages/theme/src/blocks/schema.ts
-    highlight: z.object({ title: z.string(), items: z.array(z.string()).min(1).max(6) }).strict().optional(),
-  })
-  .strict()
-  .meta({ title: "Text and picture", description: "Words with a photo or a short list beside them." });
-=======
     highlight: z
       .object({ title: z.string(), items: z.array(z.string()).min(1) })
       .strict()
@@ -159,7 +153,6 @@ export const SplitBlock = z
   })
   .strict()
   .meta({ title: "Text and picture", description: "Text beside a picture or a highlight box (one of the two)." });
->>>>>>> the template now
 
 export const StepsBlock = z
   .object({
