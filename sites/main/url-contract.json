@@ -88,5 +88,11 @@
     "expect": 200,
     "kind": "file",
     "why": "generated file"
+  },
+  {
+    "path": "/issue-53-check",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
   }
 ]
