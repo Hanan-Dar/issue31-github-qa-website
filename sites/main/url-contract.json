@@ -94,5 +94,11 @@
     "expect": 200,
     "kind": "page",
     "why": "built page"
+  },
+  {
+    "path": "/issue-53-words",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
   }
 ]
