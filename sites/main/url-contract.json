@@ -94,11 +94,5 @@
     "expect": 200,
     "kind": "page",
     "why": "built page"
-  },
-  {
-    "path": "/issue-53-check",
-    "expect": 200,
-    "kind": "page",
-    "why": "built page"
   }
 ]
