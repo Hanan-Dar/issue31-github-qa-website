@@ -1,0 +1,9 @@
+title: Blogs
+seo:
+  title: Blogs
+  description: ""
+updatedAt: 2026-11-18
+blocks:
+  - blockType: hero
+    title: Blogs
+    lead: "News and tips from our plumbers (issue 53 test)."
