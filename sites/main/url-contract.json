@@ -88,5 +88,11 @@
     "expect": 200,
     "kind": "file",
     "why": "generated file"
+  },
+  {
+    "path": "/about-me",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
   }
 ]

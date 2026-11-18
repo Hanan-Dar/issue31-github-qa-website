@@ -1,0 +1,9 @@
+title: About Me
+seo:
+  title: About Me
+  description: "Things to know about me"
+updatedAt: 2026-11-18
+blocks:
+  - blockType: hero
+    title: About Me
+    lead: "Here are the details about me"
