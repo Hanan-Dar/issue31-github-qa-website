@@ -90,7 +90,7 @@
     "why": "generated file"
   },
   {
-    "path": "/issue-53-words",
+    "path": "/ghost",
     "expect": 200,
     "kind": "page",
     "why": "built page"
