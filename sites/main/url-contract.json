@@ -88,5 +88,17 @@
     "expect": 200,
     "kind": "file",
     "why": "generated file"
+  },
+  {
+    "path": "/ghost",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
+    "path": "/issue-53-check",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
   }
 ]
