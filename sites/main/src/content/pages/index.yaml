@@ -10,7 +10,7 @@ blocks:
     title: "Reliable plumbing and heating, done right the first time"
     lead: "A test plumber in Leeds, made to check new sites on GitHub."
     buttons:
-      - label: "Get a free quote"
+      - label: "Book a free quote"
         href: /contact
       - label: "See our services"
         href: /services
@@ -105,5 +105,5 @@ blocks:
     title: Need a plumber you can rely on?
     text: Tell us what you need and we'll get back to you with a clear quote.
     buttons:
-      - label: Get a free quote
+      - label: Book a free quote
         href: /contact
