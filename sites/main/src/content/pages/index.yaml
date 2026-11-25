@@ -38,6 +38,24 @@ blocks:
         text: Burst pipes, leaks and blockages. Call us and we'll tell you straight away when we can be there.
         href: /services/emergency-plumbing
 
+  - blockType: testimonials
+    tone: tint
+    eyebrow: Reviews
+    title: What our customers say
+    items:
+      - quote: "Our boiler broke on a Sunday and they had it working again the same afternoon. Clear price, no mess."
+        name: Sarah M.
+        detail: "Emergency boiler repair, Headingley"
+        rating: 5
+      - quote: "A second real review goes here, ideally about a different service, with the customer's permission to use it."
+        name: Sample review
+        detail: "Bathroom installation"
+        rating: 5
+      - quote: "A third real review. Short and specific works best: what was done, and how it went."
+        name: Sample review
+        detail: "Emergency call-out"
+        rating: 5
+
   - blockType: split
     tone: white
     eyebrow: Why choose us
@@ -66,24 +84,6 @@ blocks:
         text: We do the work tidily on the agreed day and keep you posted as we go.
       - title: Check and sign off
         text: We test everything with you and leave the place clean.
-
-  - blockType: testimonials
-    tone: tint
-    eyebrow: Reviews
-    title: What our customers say
-    items:
-      - quote: "Our boiler broke on a Sunday and they had it working again the same afternoon. Clear price, no mess."
-        name: Sarah M.
-        detail: "Emergency boiler repair, Headingley"
-        rating: 5
-      - quote: "A second real review goes here, ideally about a different service, with the customer's permission to use it."
-        name: Sample review
-        detail: "Bathroom installation"
-        rating: 5
-      - quote: "A third real review. Short and specific works best: what was done, and how it went."
-        name: Sample review
-        detail: "Emergency call-out"
-        rating: 5
 
   - blockType: areas
     eyebrow: Where we work
