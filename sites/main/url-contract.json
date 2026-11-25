@@ -24,6 +24,12 @@
     "why": "built page"
   },
   {
+    "path": "/boiler-servicing",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
     "path": "/contact-us",
     "expect": 301,
     "to": "/contact",

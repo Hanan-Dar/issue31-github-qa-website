@@ -1,0 +1,33 @@
+title: "Boiler servicing"
+seo:
+  title: "Boiler Servicing in Leeds | Book a Service"
+  description: "Book an annual boiler service with our plumbing and heating team in Leeds. Get in touch to arrange a visit."
+updatedAt: 2026-10-19
+blocks:
+  - blockType: hero
+    eyebrow: "Boiler servicing in Leeds"
+    title: "Keep your boiler in good working order"
+    lead: "An annual boiler service helps keep your heating system working as it should. Get in touch to arrange a service with our team."
+    buttons:
+      - label: "Book a boiler service"
+        href: /contact
+  - blockType: features
+    eyebrow: "Annual service"
+    title: "What an annual service includes"
+    lead: "During an annual service, we check your boiler and its operation."
+    items:
+      - icon: Flame
+        title: "Boiler checks"
+        text: "We check the boiler and its components."
+      - icon: ShieldCheck
+        title: "Safe operation"
+        text: "We check that the boiler is operating safely."
+      - icon: ClipboardCheck
+        title: "Advice"
+        text: "We explain our findings and let you know if anything needs attention."
+  - blockType: cta
+    title: "Book your boiler service"
+    text: "Contact our team to arrange a boiler service."
+    buttons:
+      - label: "Get in touch"
+        href: /contact
