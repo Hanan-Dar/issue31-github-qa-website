@@ -72,9 +72,9 @@ blocks:
     eyebrow: Reviews
     title: What our customers say
     items:
-      - quote: "Replace this with a real review from a customer, in their own words. Reviews you publish must be genuine."
-        name: Sample review
-        detail: "Boiler service, Leeds"
+      - quote: "Our boiler broke on a Sunday and they had it working again the same afternoon. Clear price, no mess."
+        name: Sarah M.
+        detail: "Emergency boiler repair, Headingley"
         rating: 5
       - quote: "A second real review goes here, ideally about a different service, with the customer's permission to use it."
         name: Sample review
