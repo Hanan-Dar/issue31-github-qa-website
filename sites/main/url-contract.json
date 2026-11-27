@@ -12,6 +12,12 @@
     "why": "built page"
   },
   {
+    "path": "/about-me",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
+  },
+  {
     "path": "/areas",
     "expect": 200,
     "kind": "page",
@@ -28,6 +34,12 @@
     "expect": 301,
     "to": "/contact",
     "why": "redirects.ts"
+  },
+  {
+    "path": "/gas-safety",
+    "expect": 200,
+    "kind": "page",
+    "why": "built page"
   },
   {
     "path": "/home",
@@ -88,11 +100,5 @@
     "expect": 200,
     "kind": "file",
     "why": "generated file"
-  },
-  {
-    "path": "/about-me",
-    "expect": 200,
-    "kind": "page",
-    "why": "built page"
   }
 ]

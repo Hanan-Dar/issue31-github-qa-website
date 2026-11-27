@@ -1,0 +1,43 @@
+title: "Gas safety checks"
+seo:
+  title: "Gas safety checks in Leeds | Issue31 GitHub QA"
+  description: "What a gas safety check covers, how long it takes and how to get a free, written quote for one from Issue31 GitHub QA in Leeds."
+updatedAt: 2026-11-27
+blocks:
+  - blockType: hero
+    title: Gas safety checks
+    lead: "A gas safety check makes sure your gas appliances and pipework are safe to use. Tell us what you need and we'll send a clear, written quote."
+    buttons:
+      - label: Get a free quote
+        href: /contact
+    points:
+      - Written quote before any work
+      - Clear report of what we found
+      - Advice on anything that needs fixing
+
+  - blockType: split
+    title: What the check covers
+    body: |
+      We look at the gas appliances in your home, such as your boiler, hob and fires, and check that each one works safely. We also check the pipework, the flue that takes fumes outside, and the ventilation the appliance needs.
+
+      Once we've finished, we explain what we found in plain English, and tell you about any work we'd recommend, with a price, before we start.
+    bullets:
+      - Gas appliances, checked to work safely
+      - Gas pipework, checked for leaks
+      - Flues and ventilation
+      - A written record of the check
+
+  - blockType: split
+    tone: white
+    title: How long it takes
+    body: |
+      The length of a check depends on how many gas appliances you have and where they are. Most homes are done in one visit.
+
+      When you get in touch, tell us what appliances you have and we'll give you an estimate for the visit.
+
+  - blockType: cta
+    title: Book a gas safety check
+    text: Get in touch for a free, written quote, and we'll agree a time that suits you.
+    buttons:
+      - label: Get a free quote
+        href: /contact
