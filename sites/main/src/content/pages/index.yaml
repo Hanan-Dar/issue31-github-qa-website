@@ -7,7 +7,7 @@ blocks:
   - blockType: hero
     variant: home
     eyebrow: "Plumbing and heating in Leeds"
-    title: "Reliable plumbing and heating, done properly the first time"
+    title: "Plumbing and heating you can count on"
     lead: "A test plumber in Leeds, made to check new sites on GitHub."
     buttons:
       - label: "Get a free quote"
